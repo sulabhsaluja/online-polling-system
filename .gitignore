@@ -82,3 +82,6 @@ log/
 *.bak
 *.swp
 *.swo
+
+
+node_modules

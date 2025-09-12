@@ -1,5 +1,7 @@
+
 package com.polling.app.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -8,7 +10,7 @@ import lombok.ToString;
 
 import java.time.LocalDateTime;
 import java.util.Set;
-
+@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 @Entity
 @Table(name = "admins")
 @Data
