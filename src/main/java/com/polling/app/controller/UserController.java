@@ -19,7 +19,6 @@ import java.util.Map;
 @RequestMapping("/api/user")
 @RequiredArgsConstructor
 @Slf4j
-@CrossOrigin(origins = "*")
 public class UserController {
 
     private final UserService userService;
@@ -32,6 +31,28 @@ public class UserController {
             return new ResponseEntity<>(createdUser, HttpStatus.CREATED);
         } catch (RuntimeException e) {
             return ResponseEntity.badRequest()
+                    .body(Map.of("error", e.getMessage()));
+        }
+    }
+
+    @PostMapping("/login")
+    public ResponseEntity<?> loginUser(@RequestBody Map<String, String> loginRequest) {
+        try {
+            String email = loginRequest.get("email");
+            String password = loginRequest.get("password");
+            
+            if (email == null || password == null) {
+                return ResponseEntity.badRequest()
+                        .body(Map.of("error", "Email and password are required"));
+            }
+            
+            User user = userService.authenticateUser(email, password);
+            return ResponseEntity.ok(Map.of(
+                    "message", "Login successful",
+                    "user", user
+            ));
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
                     .body(Map.of("error", e.getMessage()));
         }
     }
@@ -114,6 +135,17 @@ public class UserController {
                     "options", options,
                     "totalVotes", totalVotes
             ));
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest()
+                    .body(Map.of("error", e.getMessage()));
+        }
+    }
+
+    @GetMapping("/{userId}/voted-polls")
+    public ResponseEntity<?> getUserVotedPolls(@PathVariable Long userId) {
+        try {
+            List<Poll> votedPolls = pollService.getPollsUserHasVotedIn(userId);
+            return ResponseEntity.ok(votedPolls);
         } catch (RuntimeException e) {
             return ResponseEntity.badRequest()
                     .body(Map.of("error", e.getMessage()));

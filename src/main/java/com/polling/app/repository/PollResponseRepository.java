@@ -25,4 +25,7 @@ public interface PollResponseRepository extends JpaRepository<PollResponse, Long
     Long countByPollOptionId(@Param("optionId") Long optionId);
     
     boolean existsByUserIdAndPollId(Long userId, Long pollId);
+    
+    @Query("SELECT DISTINCT pr.poll FROM PollResponse pr WHERE pr.user.id = :userId ORDER BY pr.responseDate DESC")
+    List<com.polling.app.entity.Poll> findDistinctPollsByUserId(@Param("userId") Long userId);
 }

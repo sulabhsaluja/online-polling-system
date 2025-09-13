@@ -7,6 +7,12 @@ class UserService {
     return response.data;
   }
 
+  // User login
+  async loginUser(credentials) {
+    const response = await api.post('/user/login', credentials);
+    return response.data;
+  }
+
   // Get user by ID
   async getUserById(userId) {
     const response = await api.get(`/user/${userId}`);
@@ -54,6 +60,12 @@ class UserService {
   // Get poll results
   async getPollResults(pollId) {
     const response = await api.get(`/user/polls/${pollId}/results`);
+    return response.data;
+  }
+
+  // Get polls user has voted in
+  async getUserVotedPolls(userId) {
+    const response = await api.get(`/user/${userId}/voted-polls`);
     return response.data;
   }
 }

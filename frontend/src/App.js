@@ -11,6 +11,12 @@ import AdminDashboard from './pages/AdminDashboard';
 import CreatePoll from './pages/CreatePoll';
 import PollVoting from './pages/PollVoting';
 import Home from './pages/Home';
+import AdminPolls from './pages/AdminPolls';
+import UserPolls from './pages/UserPolls';
+import AdminProfile from './pages/AdminProfile';
+import UserProfile from './pages/UserProfile';
+import PollResults from './pages/PollResults';
+import EditPoll from './pages/EditPoll';
 import './App.css';
 
 // Protected Route Components
@@ -33,7 +39,7 @@ const ProtectedRoute = ({ children, requireAuth = true, adminOnly = false, userO
 };
 
 const AppRoutes = () => {
-  const { isAuthenticated, isAdmin, isUser } = useAuth();
+  const { isAuthenticated, isAdmin } = useAuth();
 
   return (
     <div className="App">
@@ -70,6 +76,22 @@ const AppRoutes = () => {
             </ProtectedRoute>
           } 
         />
+        <Route 
+          path="/user/polls" 
+          element={
+            <ProtectedRoute userOnly>
+              <UserPolls />
+            </ProtectedRoute>
+          } 
+        />
+        <Route 
+          path="/user/profile/:userId" 
+          element={
+            <ProtectedRoute userOnly>
+              <UserProfile />
+            </ProtectedRoute>
+          } 
+        />
 
         {/* Admin Routes */}
         <Route path="/admin/login" element={<AdminLogin />} />
@@ -87,6 +109,38 @@ const AppRoutes = () => {
           element={
             <ProtectedRoute adminOnly>
               <CreatePoll />
+            </ProtectedRoute>
+          } 
+        />
+        <Route 
+          path="/admin/polls" 
+          element={
+            <ProtectedRoute adminOnly>
+              <AdminPolls />
+            </ProtectedRoute>
+          } 
+        />
+        <Route 
+          path="/admin/profile/:adminId" 
+          element={
+            <ProtectedRoute adminOnly>
+              <AdminProfile />
+            </ProtectedRoute>
+          } 
+        />
+        <Route 
+          path="/admin/poll/:pollId/results" 
+          element={
+            <ProtectedRoute adminOnly>
+              <PollResults />
+            </ProtectedRoute>
+          } 
+        />
+        <Route 
+          path="/admin/poll/:pollId/edit" 
+          element={
+            <ProtectedRoute adminOnly>
+              <EditPoll />
             </ProtectedRoute>
           } 
         />

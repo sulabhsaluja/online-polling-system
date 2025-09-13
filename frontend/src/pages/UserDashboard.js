@@ -6,19 +6,32 @@ import userService from '../services/userService';
 const UserDashboard = () => {
   const { user } = useAuth();
   const [activePolls, setActivePolls] = useState([]);
+  const [votedPolls, setVotedPolls] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
   useEffect(() => {
-    fetchActivePolls();
-  }, []);
+    if (user) {
+      fetchDashboardData();
+    }
+  }, [user]);
 
-  const fetchActivePolls = async () => {
+  const fetchDashboardData = async () => {
     try {
-      const polls = await userService.getActivePolls();
-      setActivePolls(polls);
+      const [activePolls, votedPolls] = await Promise.all([
+        userService.getActivePolls(),
+        userService.getUserVotedPolls(user.id)
+      ]);
+      
+      // Filter out polls user has already voted in from active polls
+      const votedPollIds = new Set(votedPolls.map(poll => poll.id));
+      const availablePolls = activePolls.filter(poll => !votedPollIds.has(poll.id));
+      
+      setActivePolls(availablePolls);
+      setVotedPolls(votedPolls);
     } catch (err) {
-      setError('Failed to load polls');
+      console.error('Error fetching dashboard data:', err);
+      setError('Failed to load dashboard data');
     } finally {
       setLoading(false);
     }
@@ -63,18 +76,19 @@ const UserDashboard = () => {
 
           <div className="row">
             <div className="col-md-8">
-              <div className="card">
+              {/* Available Polls */}
+              <div className="card mb-4">
                 <div className="card-header">
                   <h5 className="mb-0">
                     <i className="bi bi-list-ul me-2"></i>
-                    Active Polls ({activePolls.length})
+                    Available Polls ({activePolls.length})
                   </h5>
                 </div>
                 <div className="card-body">
                   {activePolls.length === 0 ? (
                     <div className="text-center py-4">
                       <i className="bi bi-inbox display-4 text-muted mb-3"></i>
-                      <p className="text-muted">No active polls available at the moment.</p>
+                      <p className="text-muted">No new polls available at the moment.</p>
                       <p className="text-muted">Check back later!</p>
                     </div>
                   ) : (
@@ -98,6 +112,55 @@ const UserDashboard = () => {
                                 >
                                   Vote Now
                                 </Link>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </div>
+              
+              {/* Voted Polls */}
+              <div className="card">
+                <div className="card-header">
+                  <h5 className="mb-0">
+                    <i className="bi bi-check-circle me-2"></i>
+                    Your Votes ({votedPolls.length})
+                  </h5>
+                </div>
+                <div className="card-body">
+                  {votedPolls.length === 0 ? (
+                    <div className="text-center py-4">
+                      <i className="bi bi-ballot display-4 text-muted mb-3"></i>
+                      <p className="text-muted">You haven't voted in any polls yet.</p>
+                      <p className="text-muted">Cast your first vote above!</p>
+                    </div>
+                  ) : (
+                    <div className="row">
+                      {votedPolls.map((poll) => (
+                        <div key={poll.id} className="col-md-6 mb-3">
+                          <div className="card border-success">
+                            <div className="card-body">
+                              <h6 className="card-title">
+                                {poll.title}
+                                <span className="badge bg-success ms-2 small">Voted</span>
+                              </h6>
+                              <p className="card-text text-muted small">
+                                {poll.description?.substring(0, 100)}
+                                {poll.description?.length > 100 && '...'}
+                              </p>
+                              <div className="d-flex justify-content-between align-items-center">
+                                <small className="text-muted">
+                                  Created: {formatDate(poll.createdAt)}
+                                </small>
+                                <button 
+                                  className="btn btn-outline-success btn-sm"
+                                  onClick={() => window.open(`/user/polls/${poll.id}/results`, '_blank')}
+                                >
+                                  View Results
+                                </button>
                               </div>
                             </div>
                           </div>
@@ -147,7 +210,7 @@ const UserDashboard = () => {
                       </div>
                     </div>
                     <div className="col-6">
-                      <h4 className="text-success mb-0">0</h4>
+                      <h4 className="text-success mb-0">{votedPolls.length}</h4>
                       <small className="text-muted">Votes Cast</small>
                     </div>
                   </div>

@@ -7,6 +7,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.List;
 import java.util.Optional;
 
@@ -26,6 +28,10 @@ public class AdminService {
         if (adminRepository.existsByEmail(admin.getEmail())) {
             throw new RuntimeException("Admin email already exists: " + admin.getEmail());
         }
+        
+        // Hash the password before saving
+        admin.setPassword(hashPassword(admin.getPassword()));
+        
         return adminRepository.save(admin);
     }
 
@@ -88,5 +94,32 @@ public class AdminService {
     @Transactional(readOnly = true)
     public boolean existsByEmail(String email) {
         return adminRepository.existsByEmail(email);
+    }
+
+    public Admin authenticateAdmin(String email, String password) {
+        log.info("Attempting to authenticate admin with email: {}", email);
+        Admin admin = adminRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("Invalid email or password"));
+        
+        String hashedPassword = hashPassword(password);
+        if (!admin.getPassword().equals(hashedPassword)) {
+            throw new RuntimeException("Invalid email or password");
+        }
+        
+        return admin;
+    }
+
+    private String hashPassword(String password) {
+        try {
+            MessageDigest md = MessageDigest.getInstance("SHA-256");
+            byte[] hashedBytes = md.digest(password.getBytes());
+            StringBuilder sb = new StringBuilder();
+            for (byte b : hashedBytes) {
+                sb.append(String.format("%02x", b));
+            }
+            return sb.toString();
+        } catch (NoSuchAlgorithmException e) {
+            throw new RuntimeException("Error hashing password", e);
+        }
     }
 }

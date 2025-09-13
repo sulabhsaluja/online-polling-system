@@ -19,7 +19,6 @@ import java.util.Map;
 @RequestMapping("/api/admin")
 @RequiredArgsConstructor
 @Slf4j
-@CrossOrigin(origins = "*")
 public class AdminController {
 
     private final AdminService adminService;
@@ -32,6 +31,28 @@ public class AdminController {
             return new ResponseEntity<>(createdAdmin, HttpStatus.CREATED);
         } catch (RuntimeException e) {
             return ResponseEntity.badRequest()
+                    .body(Map.of("error", e.getMessage()));
+        }
+    }
+
+    @PostMapping("/login")
+    public ResponseEntity<?> loginAdmin(@RequestBody Map<String, String> loginRequest) {
+        try {
+            String email = loginRequest.get("email");
+            String password = loginRequest.get("password");
+            
+            if (email == null || password == null) {
+                return ResponseEntity.badRequest()
+                        .body(Map.of("error", "Email and password are required"));
+            }
+            
+            Admin admin = adminService.authenticateAdmin(email, password);
+            return ResponseEntity.ok(Map.of(
+                    "message", "Login successful",
+                    "admin", admin
+            ));
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
                     .body(Map.of("error", e.getMessage()));
         }
     }
@@ -136,6 +157,28 @@ public class AdminController {
         }
     }
 
+    @PatchMapping("/{adminId}/polls/{pollId}/activate")
+    public ResponseEntity<?> activatePoll(
+            @PathVariable Long adminId,
+            @PathVariable Long pollId) {
+        try {
+            // Verify the poll belongs to this admin
+            Poll existingPoll = pollService.getPollById(pollId)
+                    .orElseThrow(() -> new RuntimeException("Poll not found"));
+            
+            if (!existingPoll.getAdmin().getId().equals(adminId)) {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                        .body(Map.of("error", "Not authorized to activate this poll"));
+            }
+            
+            pollService.activatePoll(pollId);
+            return ResponseEntity.ok(Map.of("message", "Poll activated successfully"));
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest()
+                    .body(Map.of("error", e.getMessage()));
+        }
+    }
+
     @DeleteMapping("/{adminId}/polls/{pollId}")
     public ResponseEntity<?> deletePoll(
             @PathVariable Long adminId,
@@ -161,16 +204,19 @@ public class AdminController {
     @GetMapping("/polls/{pollId}/results")
     public ResponseEntity<?> getPollResults(@PathVariable Long pollId) {
         try {
+            // First verify the poll exists
+            Poll poll = pollService.getPollById(pollId)
+                    .orElseThrow(() -> new RuntimeException("Poll not found with ID: " + pollId));
+            
             List<PollOption> options = pollService.getPollOptions(pollId);
-            List<PollResponse> responses = pollService.getPollResults(pollId);
             Long totalVotes = pollService.getTotalVotesForPoll(pollId);
             
             return ResponseEntity.ok(Map.of(
                     "options", options,
-                    "responses", responses,
                     "totalVotes", totalVotes
             ));
         } catch (RuntimeException e) {
+            log.error("Error getting poll results for poll ID {}: {}", pollId, e.getMessage());
             return ResponseEntity.badRequest()
                     .body(Map.of("error", e.getMessage()));
         }

@@ -14,7 +14,7 @@ const AdminDashboard = () => {
     if (admin) {
       fetchAdminPolls();
     }
-  }, [admin]);
+  }, [admin]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const fetchAdminPolls = async () => {
     try {
@@ -37,6 +37,15 @@ const AdminDashboard = () => {
       await fetchAdminPolls(); // Refresh data
     } catch (err) {
       setError('Failed to deactivate poll');
+    }
+  };
+
+  const handleActivatePoll = async (pollId) => {
+    try {
+      await adminService.activatePoll(admin.id, pollId);
+      await fetchAdminPolls(); // Refresh data
+    } catch (err) {
+      setError('Failed to activate poll');
     }
   };
 
@@ -158,13 +167,21 @@ const AdminDashboard = () => {
                                   >
                                     <i className="bi bi-pencil"></i>
                                   </Link>
-                                  {poll.isActive && (
+                                  {poll.isActive ? (
                                     <button
                                       className="btn btn-outline-warning"
                                       onClick={() => handleDeactivatePoll(poll.id)}
                                       title="Deactivate Poll"
                                     >
                                       <i className="bi bi-pause"></i>
+                                    </button>
+                                  ) : (
+                                    <button
+                                      className="btn btn-outline-success"
+                                      onClick={() => handleActivatePoll(poll.id)}
+                                      title="Activate Poll"
+                                    >
+                                      <i className="bi bi-play"></i>
                                     </button>
                                   )}
                                   <button

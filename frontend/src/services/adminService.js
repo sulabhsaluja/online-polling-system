@@ -7,6 +7,12 @@ class AdminService {
     return response.data;
   }
 
+  // Admin login
+  async loginAdmin(credentials) {
+    const response = await api.post('/admin/login', credentials);
+    return response.data;
+  }
+
   // Get admin by ID
   async getAdminById(adminId) {
     const response = await api.get(`/admin/${adminId}`);
@@ -46,6 +52,12 @@ class AdminService {
   // Deactivate poll
   async deactivatePoll(adminId, pollId) {
     const response = await api.patch(`/admin/${adminId}/polls/${pollId}/deactivate`);
+    return response.data;
+  }
+
+  // Activate poll
+  async activatePoll(adminId, pollId) {
+    const response = await api.patch(`/admin/${adminId}/polls/${pollId}/activate`);
     return response.data;
   }
 

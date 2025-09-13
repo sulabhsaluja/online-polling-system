@@ -26,20 +26,19 @@ const AdminLogin = () => {
     setError('');
 
     try {
-      // For demo purposes, create a mock admin object
-      // In a real app, you'd have a proper authentication endpoint
-      const mockAdmin = {
-        id: 1,
+      const response = await adminService.loginAdmin({
         email: formData.email,
-        username: formData.email.split('@')[0],
-        firstName: 'Demo',
-        lastName: 'Admin'
-      };
+        password: formData.password
+      });
       
-      loginAdmin(mockAdmin);
-      navigate('/admin/dashboard');
+      if (response.admin) {
+        loginAdmin(response.admin);
+        navigate('/admin/dashboard');
+      } else {
+        setError('Login failed. Invalid response from server.');
+      }
     } catch (err) {
-      setError('Login failed. Please check your credentials.');
+      setError(err.response?.data?.error || 'Login failed. Please check your credentials.');
     } finally {
       setLoading(false);
     }

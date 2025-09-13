@@ -1,5 +1,7 @@
 package com.polling.app.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -9,6 +11,7 @@ import lombok.ToString;
 import java.time.LocalDateTime;
 import java.util.Set;
 
+@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 @Entity
 @Table(name = "poll_options")
 @Data
@@ -32,10 +35,12 @@ public class PollOption {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "poll_id", nullable = false)
     @ToString.Exclude
+    @JsonIgnore
     private Poll poll;
 
     @OneToMany(mappedBy = "pollOption", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @ToString.Exclude
+    @JsonIgnore
     private Set<PollResponse> pollResponses;
 
     @PrePersist

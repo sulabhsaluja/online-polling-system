@@ -26,23 +26,19 @@ const UserLogin = () => {
     setError('');
 
     try {
-      // Since there's no login endpoint in the backend, we'll simulate login by getting user by email
-      // In a real app, you'd have a proper authentication endpoint
-      const users = await userService.getActivePolls(); // This would be replaced with actual auth
-      
-      // For demo purposes, create a mock user object
-      const mockUser = {
-        id: 1,
+      const response = await userService.loginUser({
         email: formData.email,
-        username: formData.email.split('@')[0],
-        firstName: 'Demo',
-        lastName: 'User'
-      };
+        password: formData.password
+      });
       
-      loginUser(mockUser);
-      navigate('/user/dashboard');
+      if (response.user) {
+        loginUser(response.user);
+        navigate('/user/dashboard');
+      } else {
+        setError('Login failed. Invalid response from server.');
+      }
     } catch (err) {
-      setError('Login failed. Please check your credentials.');
+      setError(err.response?.data?.error || 'Login failed. Please check your credentials.');
     } finally {
       setLoading(false);
     }

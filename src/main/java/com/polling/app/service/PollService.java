@@ -84,6 +84,15 @@ public class PollService {
         pollRepository.save(poll);
     }
 
+    public void activatePoll(Long pollId) {
+        log.info("Activating poll with ID: {}", pollId);
+        Poll poll = pollRepository.findById(pollId)
+                .orElseThrow(() -> new RuntimeException("Poll not found with ID: " + pollId));
+        
+        poll.setIsActive(true);
+        pollRepository.save(poll);
+    }
+
     public void deletePoll(Long pollId) {
         log.info("Deleting poll with ID: {}", pollId);
         if (!pollRepository.existsById(pollId)) {
@@ -151,5 +160,10 @@ public class PollService {
     @Transactional(readOnly = true)
     public boolean hasUserVoted(Long userId, Long pollId) {
         return pollResponseRepository.existsByUserIdAndPollId(userId, pollId);
+    }
+
+    @Transactional(readOnly = true)
+    public List<Poll> getPollsUserHasVotedIn(Long userId) {
+        return pollResponseRepository.findDistinctPollsByUserId(userId);
     }
 }
