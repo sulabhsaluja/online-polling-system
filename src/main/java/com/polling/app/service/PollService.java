@@ -98,7 +98,30 @@ public class PollService {
         if (!pollRepository.existsById(pollId)) {
             throw new RuntimeException("Poll not found with ID: " + pollId);
         }
-        pollRepository.deleteById(pollId);
+        
+        try {
+            // First delete all poll responses for this poll
+            List<PollResponse> responses = pollResponseRepository.findByPollId(pollId);
+            if (!responses.isEmpty()) {
+                log.info("Deleting {} poll responses for poll ID: {}", responses.size(), pollId);
+                pollResponseRepository.deleteAll(responses);
+            }
+            
+            // Then delete all poll options for this poll
+            List<PollOption> options = pollOptionRepository.findByPollIdOrderByVoteCountDesc(pollId);
+            if (!options.isEmpty()) {
+                log.info("Deleting {} poll options for poll ID: {}", options.size(), pollId);
+                pollOptionRepository.deleteAll(options);
+            }
+            
+            // Finally delete the poll itself
+            pollRepository.deleteById(pollId);
+            log.info("Successfully deleted poll with ID: {}", pollId);
+            
+        } catch (Exception e) {
+            log.error("Error deleting poll with ID {}: {}", pollId, e.getMessage(), e);
+            throw new RuntimeException("Failed to delete poll: " + e.getMessage());
+        }
     }
 
     public PollResponse submitVote(Long userId, Long pollId, Long optionId) {

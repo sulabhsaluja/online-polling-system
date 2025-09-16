@@ -1,5 +1,6 @@
 package com.polling.app.repository;
 
+import com.polling.app.entity.Poll;
 import com.polling.app.entity.PollResponse;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -11,21 +12,22 @@ import java.util.Optional;
 
 @Repository
 public interface PollResponseRepository extends JpaRepository<PollResponse, Long> {
-    
+
     Optional<PollResponse> findByUserIdAndPollId(Long userId, Long pollId);
-    
+
     List<PollResponse> findByPollId(Long pollId);
-    
+
     List<PollResponse> findByUserId(Long userId);
-    
+
     @Query("SELECT COUNT(pr) FROM PollResponse pr WHERE pr.poll.id = :pollId")
     Long countByPollId(@Param("pollId") Long pollId);
-    
+
     @Query("SELECT COUNT(pr) FROM PollResponse pr WHERE pr.pollOption.id = :optionId")
     Long countByPollOptionId(@Param("optionId") Long optionId);
-    
+
     boolean existsByUserIdAndPollId(Long userId, Long pollId);
-    
-    @Query("SELECT DISTINCT pr.poll FROM PollResponse pr WHERE pr.user.id = :userId ORDER BY pr.responseDate DESC")
-    List<com.polling.app.entity.Poll> findDistinctPollsByUserId(@Param("userId") Long userId);
+
+    // ✅ Fixed query to avoid SQL error with DISTINCT + ORDER BY
+    @Query("SELECT pr.poll FROM PollResponse pr WHERE pr.user.id = :userId GROUP BY pr.poll.id ORDER BY MAX(pr.responseDate) DESC")
+    List<Poll> findDistinctPollsByUserId(@Param("userId") Long userId);
 }

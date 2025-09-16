@@ -18,20 +18,30 @@ const UserDashboard = () => {
 
   const fetchDashboardData = async () => {
     try {
+      console.log('Starting to fetch dashboard data for user:', user);
+      
       const [activePolls, votedPolls] = await Promise.all([
         userService.getActivePolls(),
         userService.getUserVotedPolls(user.id)
       ]);
       
+      console.log('Fetched active polls:', activePolls);
+      console.log('Fetched voted polls:', votedPolls);
+      
       // Filter out polls user has already voted in from active polls
       const votedPollIds = new Set(votedPolls.map(poll => poll.id));
       const availablePolls = activePolls.filter(poll => !votedPollIds.has(poll.id));
+      
+      console.log('Available polls after filtering:', availablePolls);
+      console.log('Voted poll IDs:', Array.from(votedPollIds));
       
       setActivePolls(availablePolls);
       setVotedPolls(votedPolls);
     } catch (err) {
       console.error('Error fetching dashboard data:', err);
-      setError('Failed to load dashboard data');
+      console.error('Error details:', err.response?.data);
+      console.error('Error status:', err.response?.status);
+      setError(`Failed to load dashboard data: ${err.response?.data?.error || err.message}`);
     } finally {
       setLoading(false);
     }
