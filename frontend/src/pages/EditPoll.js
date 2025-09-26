@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import adminService from '../services/adminService';
+import { parseValidationErrors, getFieldClass, validateField } from '../utils/validationUtils';
+import { ValidationFeedback } from '../components/ValidationFeedback';
 
 const EditPoll = () => {
   const { pollId } = useParams();
@@ -16,6 +18,8 @@ const EditPoll = () => {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
+  const [fieldErrors, setFieldErrors] = useState({});
+  const [touchedFields, setTouchedFields] = useState({});
 
   useEffect(() => {
     if (admin && pollId) {
@@ -46,10 +50,38 @@ const EditPoll = () => {
   };
 
   const handleInputChange = (e) => {
+    const { name, value } = e.target;
     setFormData({
       ...formData,
-      [e.target.name]: e.target.value
+      [name]: value
     });
+    
+    // Clear field-specific errors when user starts typing
+    if (fieldErrors[name]) {
+      setFieldErrors(prev => ({
+        ...prev,
+        [name]: []
+      }));
+    }
+    
+    // Clear general error when user makes changes
+    if (error) {
+      setError('');
+    }
+  };
+
+  const handleBlur = (e) => {
+    const { name, value } = e.target;
+    setTouchedFields(prev => ({ ...prev, [name]: true }));
+    
+    // Validate field on blur for immediate feedback
+    const fieldErrors = validateField(name, value);
+    if (fieldErrors.length > 0) {
+      setFieldErrors(prev => ({
+        ...prev,
+        [name]: fieldErrors
+      }));
+    }
   };
 
   const handleSubmit = async (e) => {
@@ -81,8 +113,9 @@ const EditPoll = () => {
       });
       
     } catch (err) {
-      const errorMessage = err.response?.data?.error || 'Failed to update poll';
-      setError(errorMessage);
+      const errorInfo = parseValidationErrors(err);
+      setError(errorInfo.generalMessage);
+      setFieldErrors(errorInfo.fieldErrors);
     } finally {
       setSaving(false);
     }
@@ -194,27 +227,31 @@ const EditPoll = () => {
                   </label>
                   <input
                     type="text"
-                    className="form-control"
+                    className={getFieldClass('title', fieldErrors, touchedFields.title)}
                     id="title"
                     name="title"
                     value={formData.title}
                     onChange={handleInputChange}
+                    onBlur={handleBlur}
                     placeholder="Enter a clear, concise poll title"
                     required
                   />
+                  <ValidationFeedback fieldName="title" fieldErrors={fieldErrors} />
                 </div>
 
                 <div className="mb-4">
                   <label htmlFor="description" className="form-label">Description</label>
                   <textarea
-                    className="form-control"
+                    className={getFieldClass('description', fieldErrors, touchedFields.description)}
                     id="description"
                     name="description"
                     rows="3"
                     value={formData.description}
                     onChange={handleInputChange}
+                    onBlur={handleBlur}
                     placeholder="Provide additional context or instructions (optional)"
                   ></textarea>
+                  <ValidationFeedback fieldName="description" fieldErrors={fieldErrors} />
                 </div>
 
                 <div className="alert alert-warning">

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import userService from '../services/userService';
+import { parseValidationErrors } from '../utils/validationUtils';
 
 const PollVoting = () => {
   const { pollId } = useParams();
@@ -67,8 +68,8 @@ const PollVoting = () => {
       const resultsData = await userService.getPollResults(pollId);
       setResults(resultsData);
     } catch (err) {
-      const errorMessage = err.response?.data?.error || 'Failed to submit vote';
-      setError(errorMessage);
+      const errorInfo = parseValidationErrors(err);
+      setError(errorInfo.generalMessage || 'Failed to submit vote');
     } finally {
       setSubmitting(false);
     }

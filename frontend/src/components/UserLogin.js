@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import userService from '../services/userService';
+import { parseValidationErrors } from '../utils/validationUtils';
 
 const UserLogin = () => {
   const [formData, setFormData] = useState({
@@ -38,7 +39,8 @@ const UserLogin = () => {
         setError('Login failed. Invalid response from server.');
       }
     } catch (err) {
-      setError(err.response?.data?.error || 'Login failed. Please check your credentials.');
+      const errorInfo = parseValidationErrors(err);
+      setError(errorInfo.generalMessage || 'Login failed. Please check your credentials.');
     } finally {
       setLoading(false);
     }

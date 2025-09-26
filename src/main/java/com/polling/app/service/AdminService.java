@@ -4,11 +4,10 @@ import com.polling.app.entity.Admin;
 import com.polling.app.repository.AdminRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.util.List;
 import java.util.Optional;
 
@@ -19,6 +18,7 @@ import java.util.Optional;
 public class AdminService {
 
     private final AdminRepository adminRepository;
+    private final PasswordEncoder passwordEncoder;
 
     public Admin createAdmin(Admin admin) {
         log.info("Creating new admin: {}", admin.getUsername());
@@ -30,7 +30,7 @@ public class AdminService {
         }
         
         // Hash the password before saving
-        admin.setPassword(hashPassword(admin.getPassword()));
+        admin.setPassword(passwordEncoder.encode(admin.getPassword()));
         
         return adminRepository.save(admin);
     }
@@ -101,25 +101,11 @@ public class AdminService {
         Admin admin = adminRepository.findByEmail(email)
                 .orElseThrow(() -> new RuntimeException("Invalid email or password"));
         
-        String hashedPassword = hashPassword(password);
-        if (!admin.getPassword().equals(hashedPassword)) {
+        if (!passwordEncoder.matches(password, admin.getPassword())) {
             throw new RuntimeException("Invalid email or password");
         }
         
         return admin;
     }
 
-    private String hashPassword(String password) {
-        try {
-            MessageDigest md = MessageDigest.getInstance("SHA-256");
-            byte[] hashedBytes = md.digest(password.getBytes());
-            StringBuilder sb = new StringBuilder();
-            for (byte b : hashedBytes) {
-                sb.append(String.format("%02x", b));
-            }
-            return sb.toString();
-        } catch (NoSuchAlgorithmException e) {
-            throw new RuntimeException("Error hashing password", e);
-        }
-    }
 }

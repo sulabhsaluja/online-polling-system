@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import userService from '../services/userService';
+import { parseValidationErrors, getFieldClass, validateField } from '../utils/validationUtils';
+import { ValidationFeedback } from '../components/ValidationFeedback';
 
 const UserProfile = () => {
   const { userId } = useParams();
@@ -18,6 +20,8 @@ const UserProfile = () => {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
+  const [fieldErrors, setFieldErrors] = useState({});
+  const [touchedFields, setTouchedFields] = useState({});
   const [userStats, setUserStats] = useState({
     totalVotes: 0,
     pollsParticipated: 0
@@ -55,10 +59,38 @@ const UserProfile = () => {
   };
 
   const handleInputChange = (e) => {
+    const { name, value } = e.target;
     setProfileData({
       ...profileData,
-      [e.target.name]: e.target.value
+      [name]: value
     });
+    
+    // Clear field-specific errors when user starts typing
+    if (fieldErrors[name]) {
+      setFieldErrors(prev => ({
+        ...prev,
+        [name]: []
+      }));
+    }
+    
+    // Clear general error when user makes changes
+    if (error) {
+      setError('');
+    }
+  };
+
+  const handleBlur = (e) => {
+    const { name, value } = e.target;
+    setTouchedFields(prev => ({ ...prev, [name]: true }));
+    
+    // Validate field on blur for immediate feedback
+    const fieldErrors = validateField(name, value);
+    if (fieldErrors.length > 0) {
+      setFieldErrors(prev => ({
+        ...prev,
+        [name]: fieldErrors
+      }));
+    }
   };
 
   const handleSave = async () => {
@@ -77,8 +109,9 @@ const UserProfile = () => {
       setSuccess('Profile updated successfully!');
       setIsEditing(false);
     } catch (err) {
-      const errorMessage = err.response?.data?.error || 'Failed to update profile';
-      setError(errorMessage);
+      const errorInfo = parseValidationErrors(err);
+      setError(errorInfo.generalMessage);
+      setFieldErrors(errorInfo.fieldErrors);
     } finally {
       setSaving(false);
     }
@@ -151,27 +184,31 @@ const UserProfile = () => {
                     <label htmlFor="firstName" className="form-label">First Name</label>
                     <input
                       type="text"
-                      className="form-control"
+                      className={getFieldClass('firstName', fieldErrors, touchedFields.firstName)}
                       id="firstName"
                       name="firstName"
                       value={profileData.firstName}
                       onChange={handleInputChange}
+                      onBlur={handleBlur}
                       disabled={!isEditing}
                       placeholder="Enter your first name"
                     />
+                    {isEditing && <ValidationFeedback fieldName="firstName" fieldErrors={fieldErrors} />}
                   </div>
                   <div className="col-md-6">
                     <label htmlFor="lastName" className="form-label">Last Name</label>
                     <input
                       type="text"
-                      className="form-control"
+                      className={getFieldClass('lastName', fieldErrors, touchedFields.lastName)}
                       id="lastName"
                       name="lastName"
                       value={profileData.lastName}
                       onChange={handleInputChange}
+                      onBlur={handleBlur}
                       disabled={!isEditing}
                       placeholder="Enter your last name"
                     />
+                    {isEditing && <ValidationFeedback fieldName="lastName" fieldErrors={fieldErrors} />}
                   </div>
                 </div>
 
@@ -179,28 +216,32 @@ const UserProfile = () => {
                   <label htmlFor="username" className="form-label">Username</label>
                   <input
                     type="text"
-                    className="form-control"
+                    className={getFieldClass('username', fieldErrors, touchedFields.username)}
                     id="username"
                     name="username"
                     value={profileData.username}
                     onChange={handleInputChange}
+                    onBlur={handleBlur}
                     disabled={!isEditing}
                     placeholder="Enter your username"
                   />
+                  {isEditing && <ValidationFeedback fieldName="username" fieldErrors={fieldErrors} />}
                 </div>
 
                 <div className="mb-4">
                   <label htmlFor="email" className="form-label">Email</label>
                   <input
                     type="email"
-                    className="form-control"
+                    className={getFieldClass('email', fieldErrors, touchedFields.email)}
                     id="email"
                     name="email"
                     value={profileData.email}
                     onChange={handleInputChange}
+                    onBlur={handleBlur}
                     disabled={!isEditing}
                     placeholder="Enter your email"
                   />
+                  {isEditing && <ValidationFeedback fieldName="email" fieldErrors={fieldErrors} />}
                 </div>
 
                 <div className="d-flex gap-2">

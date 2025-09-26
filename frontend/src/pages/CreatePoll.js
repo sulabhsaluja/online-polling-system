@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import adminService from '../services/adminService';
+import { parseValidationErrors, getFieldClass, validateField, validatePollOptions } from '../utils/validationUtils';
+import { ValidationFeedback, PollOptionsValidation } from '../components/ValidationFeedback';
 
 const CreatePoll = () => {
   const navigate = useNavigate();
@@ -12,19 +14,59 @@ const CreatePoll = () => {
   });
   const [options, setOptions] = useState(['', '']);
   const [error, setError] = useState('');
+  const [fieldErrors, setFieldErrors] = useState({});
+  const [touchedFields, setTouchedFields] = useState({});
+  const [optionErrors, setOptionErrors] = useState([]);
   const [loading, setLoading] = useState(false);
 
   const handleInputChange = (e) => {
+    const { name, value } = e.target;
     setFormData({
       ...formData,
-      [e.target.name]: e.target.value
+      [name]: value
     });
+    
+    // Clear field-specific errors when user starts typing
+    if (fieldErrors[name]) {
+      setFieldErrors(prev => ({
+        ...prev,
+        [name]: []
+      }));
+    }
+    
+    // Clear general error when user makes changes
+    if (error) {
+      setError('');
+    }
+  };
+
+  const handleBlur = (e) => {
+    const { name, value } = e.target;
+    setTouchedFields(prev => ({ ...prev, [name]: true }));
+    
+    // Validate field on blur for immediate feedback
+    const fieldErrors = validateField(name, value);
+    if (fieldErrors.length > 0) {
+      setFieldErrors(prev => ({
+        ...prev,
+        [name]: fieldErrors
+      }));
+    }
   };
 
   const handleOptionChange = (index, value) => {
     const newOptions = [...options];
     newOptions[index] = value;
     setOptions(newOptions);
+    
+    // Validate options when changed
+    const errors = validatePollOptions(newOptions);
+    setOptionErrors(errors);
+    
+    // Clear general error when user makes changes
+    if (error) {
+      setError('');
+    }
   };
 
   const addOption = () => {
@@ -69,8 +111,9 @@ const CreatePoll = () => {
       await adminService.createPoll(admin.id, pollData);
       navigate('/admin/dashboard');
     } catch (err) {
-      const errorMessage = err.response?.data?.error || 'Failed to create poll';
-      setError(errorMessage);
+      const errorInfo = parseValidationErrors(err);
+      setError(errorInfo.generalMessage);
+      setFieldErrors(errorInfo.fieldErrors);
     } finally {
       setLoading(false);
     }
@@ -110,36 +153,41 @@ const CreatePoll = () => {
                   </label>
                   <input
                     type="text"
-                    className="form-control"
+                    className={getFieldClass('title', fieldErrors, touchedFields.title)}
                     id="title"
                     name="title"
                     value={formData.title}
                     onChange={handleInputChange}
+                    onBlur={handleBlur}
                     placeholder="Enter a clear, concise poll title"
                     required
                   />
+                  <ValidationFeedback fieldName="title" fieldErrors={fieldErrors} />
                 </div>
 
                 <div className="mb-4">
                   <label htmlFor="description" className="form-label">Description</label>
                   <textarea
-                    className="form-control"
+                    className={getFieldClass('description', fieldErrors, touchedFields.description)}
                     id="description"
                     name="description"
                     rows="3"
                     value={formData.description}
                     onChange={handleInputChange}
+                    onBlur={handleBlur}
                     placeholder="Provide additional context or instructions (optional)"
                   ></textarea>
+                  <ValidationFeedback fieldName="description" fieldErrors={fieldErrors} />
                 </div>
 
                 <div className="mb-4">
                   <label className="form-label">
                     Poll Options <span className="text-danger">*</span>
                   </label>
-                  <small className="text-muted d-block mb-2">
-                    Add the choices that users can vote for (minimum 2, maximum 10)
-                  </small>
+                  <PollOptionsValidation 
+                    errors={optionErrors} 
+                    showRequirements={optionErrors.length === 0}
+                  />
 
                   {options.map((option, index) => (
                     <div key={index} className="input-group mb-2">

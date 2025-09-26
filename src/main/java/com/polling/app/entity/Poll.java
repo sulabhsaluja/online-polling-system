@@ -2,6 +2,7 @@ package com.polling.app.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -23,9 +24,12 @@ public class Poll {
     private Long id;
 
     @Column(nullable = false)
+    @NotBlank(message = "Poll title is required")
+    @Size(min = 5, max = 200, message = "Poll title must be between 5 and 200 characters")
     private String title;
 
     @Column(columnDefinition = "TEXT")
+    @Size(max = 1000, message = "Poll description cannot exceed 1000 characters")
     private String description;
 
     @Column(name = "is_active", nullable = false)
