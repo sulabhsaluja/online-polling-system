@@ -8,6 +8,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
@@ -19,10 +20,17 @@ import java.time.LocalDateTime;
 import java.util.Arrays;
 
 import static org.hamcrest.Matchers.containsString;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-@WebMvcTest({UserController.class, AdminController.class})
+import com.polling.app.entity.User;
+import com.polling.app.entity.Admin;
+import org.junit.jupiter.api.BeforeEach;
+
+@WebMvcTest(value = {UserController.class, AdminController.class}, excludeAutoConfiguration = {SecurityAutoConfiguration.class})
 @DisplayName("Validation Integration Tests")
 class ValidationIntegrationTest {
 
@@ -40,6 +48,25 @@ class ValidationIntegrationTest {
 
     @MockBean
     private PollService pollService;
+
+    @BeforeEach
+    void setUp() {
+        // Mock successful authentication for validation tests
+        User mockUser = new User();
+        mockUser.setId(1L);
+        mockUser.setEmail("test@example.com");
+        
+        Admin mockAdmin = new Admin();
+        mockAdmin.setId(1L);
+        mockAdmin.setEmail("admin@example.com");
+        
+        when(userService.authenticateUser(anyString(), anyString())).thenReturn(mockUser);
+        when(adminService.authenticateAdmin(anyString(), anyString())).thenReturn(mockAdmin);
+        
+        // Mock other service methods that might be called
+        when(userService.createUser(any(User.class))).thenReturn(mockUser);
+        when(adminService.createAdmin(any(Admin.class))).thenReturn(mockAdmin);
+    }
 
     @Nested
     @DisplayName("User Registration Validation")

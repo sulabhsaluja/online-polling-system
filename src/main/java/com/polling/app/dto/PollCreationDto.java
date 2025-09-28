@@ -1,8 +1,10 @@
 package com.polling.app.dto;
 
 import com.polling.app.validation.UniqueOptions;
+import com.polling.app.validation.ValidPollOptions;
 import com.polling.app.validation.ValidationGroups;
 import jakarta.validation.constraints.*;
+import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -18,23 +20,22 @@ import java.util.List;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@UniqueOptions(groups = ValidationGroups.Create.class)
+@UniqueOptions
 public class PollCreationDto {
 
-    @NotBlank(message = "Poll title is required", groups = ValidationGroups.Create.class)
-    @Size(min = 5, max = 200, message = "Poll title must be between 5 and 200 characters", groups = ValidationGroups.Create.class)
+    @NotBlank(message = "Poll title is required")
+    @Size(min = 5, max = 200, message = "Poll title must be between 5 and 200 characters")
     private String title;
 
-    @Size(max = 1000, message = "Poll description cannot exceed 1000 characters", groups = ValidationGroups.Create.class)
+    @Size(max = 1000, message = "Poll description cannot exceed 1000 characters")
     private String description;
 
-    @NotNull(message = "Poll options are required", groups = ValidationGroups.Create.class)
-    @Size(min = 2, max = 10, message = "Poll must have between 2 and 10 options", groups = ValidationGroups.Create.class)
-    private List<@NotBlank(message = "Poll option cannot be empty") 
-                  @Size(min = 1, max = 100, message = "Poll option must be between 1 and 100 characters") 
-                  String> options;
+    @NotNull(message = "Poll options are required")
+    @Size(min = 2, max = 10, message = "Poll must have between 2 and 10 options")
+    @ValidPollOptions
+    private List<String> options;
 
-    @Future(message = "Poll end date must be in the future", groups = ValidationGroups.Create.class)
+    @Future(message = "Poll end date must be in the future")
     private LocalDateTime endsAt;
 
     // Custom validation to ensure all options are unique

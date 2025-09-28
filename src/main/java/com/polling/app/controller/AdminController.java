@@ -18,6 +18,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
+import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -44,6 +45,9 @@ public class AdminController {
     public ResponseEntity<Map<String, Object>> loginAdmin(
             @Validated(ValidationGroups.Login.class) @RequestBody LoginDto loginDto) {
         Admin admin = adminService.authenticateAdmin(loginDto.getEmail(), loginDto.getPassword());
+        if (admin == null) {
+            throw new RuntimeException("Authentication failed");
+        }
         return ResponseEntity.ok(Map.of(
                 "message", "Login successful",
                 "admin", admin
@@ -66,7 +70,7 @@ public class AdminController {
     @PostMapping("/{adminId}/polls")
     public ResponseEntity<Poll> createPoll(
             @PathVariable Long adminId,
-            @Validated(ValidationGroups.Create.class) @RequestBody PollCreationDto pollDto) {
+            @Valid @RequestBody PollCreationDto pollDto) {
         Poll poll = PollMapper.toEntity(pollDto);
         Poll createdPoll = pollService.createPoll(adminId, poll, pollDto.getOptions());
         return new ResponseEntity<>(createdPoll, HttpStatus.CREATED);

@@ -1,6 +1,6 @@
 package com.polling.app.dto;
 
-import com.polling.app.validation.ValidationGroups;
+// Removed ValidationGroups import as we're now using default validation
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -48,7 +48,7 @@ class PollCreationDtoTest {
             PollCreationDto dto = createValidDto();
             
             Set<ConstraintViolation<PollCreationDto>> violations = 
-                validator.validate(dto, ValidationGroups.Create.class);
+                validator.validate(dto);
             
             assertTrue(violations.isEmpty());
         }
@@ -60,7 +60,7 @@ class PollCreationDtoTest {
             dto.setTitle(null);
             
             Set<ConstraintViolation<PollCreationDto>> violations = 
-                validator.validate(dto, ValidationGroups.Create.class);
+                validator.validate(dto);
             
             assertFalse(violations.isEmpty());
             assertTrue(violations.stream()
@@ -74,7 +74,7 @@ class PollCreationDtoTest {
             dto.setTitle("   ");
             
             Set<ConstraintViolation<PollCreationDto>> violations = 
-                validator.validate(dto, ValidationGroups.Create.class);
+                validator.validate(dto);
             
             assertFalse(violations.isEmpty());
             assertTrue(violations.stream()
@@ -88,7 +88,7 @@ class PollCreationDtoTest {
             dto.setTitle("Test"); // 4 characters, minimum is 5
             
             Set<ConstraintViolation<PollCreationDto>> violations = 
-                validator.validate(dto, ValidationGroups.Create.class);
+                validator.validate(dto);
             
             assertFalse(violations.isEmpty());
             assertTrue(violations.stream()
@@ -102,7 +102,7 @@ class PollCreationDtoTest {
             dto.setTitle("A".repeat(201)); // 201 characters, maximum is 200
             
             Set<ConstraintViolation<PollCreationDto>> violations = 
-                validator.validate(dto, ValidationGroups.Create.class);
+                validator.validate(dto);
             
             assertFalse(violations.isEmpty());
             assertTrue(violations.stream()
@@ -117,7 +117,7 @@ class PollCreationDtoTest {
             dtoMin.setTitle("Title");
             
             Set<ConstraintViolation<PollCreationDto>> violationsMin = 
-                validator.validate(dtoMin, ValidationGroups.Create.class);
+                validator.validate(dtoMin);
             assertTrue(violationsMin.isEmpty());
             
             // Test maximum length (200 characters)
@@ -125,7 +125,7 @@ class PollCreationDtoTest {
             dtoMax.setTitle("A".repeat(200));
             
             Set<ConstraintViolation<PollCreationDto>> violationsMax = 
-                validator.validate(dtoMax, ValidationGroups.Create.class);
+                validator.validate(dtoMax);
             assertTrue(violationsMax.isEmpty());
         }
     }
@@ -140,7 +140,7 @@ class PollCreationDtoTest {
             PollCreationDto dto = createValidDto();
             
             Set<ConstraintViolation<PollCreationDto>> violations = 
-                validator.validate(dto, ValidationGroups.Create.class);
+                validator.validate(dto);
             
             assertTrue(violations.isEmpty());
         }
@@ -152,7 +152,7 @@ class PollCreationDtoTest {
             dto.setDescription(null);
             
             Set<ConstraintViolation<PollCreationDto>> violations = 
-                validator.validate(dto, ValidationGroups.Create.class);
+                validator.validate(dto);
             
             assertTrue(violations.isEmpty());
         }
@@ -164,7 +164,7 @@ class PollCreationDtoTest {
             dto.setDescription("");
             
             Set<ConstraintViolation<PollCreationDto>> violations = 
-                validator.validate(dto, ValidationGroups.Create.class);
+                validator.validate(dto);
             
             assertTrue(violations.isEmpty());
         }
@@ -176,7 +176,7 @@ class PollCreationDtoTest {
             dto.setDescription("A".repeat(1001)); // 1001 characters, maximum is 1000
             
             Set<ConstraintViolation<PollCreationDto>> violations = 
-                validator.validate(dto, ValidationGroups.Create.class);
+                validator.validate(dto);
             
             assertFalse(violations.isEmpty());
             assertTrue(violations.stream()
@@ -190,7 +190,7 @@ class PollCreationDtoTest {
             dto.setDescription("A".repeat(1000)); // Exactly 1000 characters
             
             Set<ConstraintViolation<PollCreationDto>> violations = 
-                validator.validate(dto, ValidationGroups.Create.class);
+                validator.validate(dto);
             
             assertTrue(violations.isEmpty());
         }
@@ -206,7 +206,7 @@ class PollCreationDtoTest {
             PollCreationDto dto = createValidDto();
             
             Set<ConstraintViolation<PollCreationDto>> violations = 
-                validator.validate(dto, ValidationGroups.Create.class);
+                validator.validate(dto);
             
             assertTrue(violations.isEmpty());
         }
@@ -218,7 +218,7 @@ class PollCreationDtoTest {
             dto.setOptions(null);
             
             Set<ConstraintViolation<PollCreationDto>> violations = 
-                validator.validate(dto, ValidationGroups.Create.class);
+                validator.validate(dto);
             
             assertFalse(violations.isEmpty());
             assertTrue(violations.stream()
@@ -232,7 +232,7 @@ class PollCreationDtoTest {
             dto.setOptions(Arrays.asList("Only One Option"));
             
             Set<ConstraintViolation<PollCreationDto>> violations = 
-                validator.validate(dto, ValidationGroups.Create.class);
+                validator.validate(dto);
             
             assertFalse(violations.isEmpty());
             assertTrue(violations.stream()
@@ -247,7 +247,7 @@ class PollCreationDtoTest {
                                         "Option6", "Option7", "Option8", "Option9", "Option10", "Option11"));
             
             Set<ConstraintViolation<PollCreationDto>> violations = 
-                validator.validate(dto, ValidationGroups.Create.class);
+                validator.validate(dto);
             
             assertFalse(violations.isEmpty());
             assertTrue(violations.stream()
@@ -261,7 +261,7 @@ class PollCreationDtoTest {
             dto.setOptions(Arrays.asList("Valid Option", null, "Another Valid Option"));
             
             Set<ConstraintViolation<PollCreationDto>> violations = 
-                validator.validate(dto, ValidationGroups.Create.class);
+                validator.validate(dto);
             
             // Note: @NotBlank validation on list elements may not work as expected
             // in all implementations. This demonstrates that such validation 
@@ -276,7 +276,7 @@ class PollCreationDtoTest {
             dto.setOptions(Arrays.asList("Valid Option", "   ", "Another Valid Option"));
             
             Set<ConstraintViolation<PollCreationDto>> violations = 
-                validator.validate(dto, ValidationGroups.Create.class);
+                validator.validate(dto);
             
             // Note: @NotBlank validation on list elements may not work as expected
             // in all implementations. This demonstrates that such validation 
@@ -291,7 +291,7 @@ class PollCreationDtoTest {
             dto.setOptions(Arrays.asList("Valid Option", "A".repeat(101), "Another Valid Option"));
             
             Set<ConstraintViolation<PollCreationDto>> violations = 
-                validator.validate(dto, ValidationGroups.Create.class);
+                validator.validate(dto);
             
             // Note: @Size validation on list elements may not work as expected
             // in all implementations. This demonstrates that such validation 
@@ -307,7 +307,7 @@ class PollCreationDtoTest {
             dtoMin.setOptions(Arrays.asList("Option1", "Option2"));
             
             Set<ConstraintViolation<PollCreationDto>> violationsMin = 
-                validator.validate(dtoMin, ValidationGroups.Create.class);
+                validator.validate(dtoMin);
             assertTrue(violationsMin.isEmpty());
             
             // Test maximum options (10)
@@ -316,7 +316,7 @@ class PollCreationDtoTest {
                                            "Option6", "Option7", "Option8", "Option9", "Option10"));
             
             Set<ConstraintViolation<PollCreationDto>> violationsMax = 
-                validator.validate(dtoMax, ValidationGroups.Create.class);
+                validator.validate(dtoMax);
             assertTrue(violationsMax.isEmpty());
         }
 
@@ -327,7 +327,7 @@ class PollCreationDtoTest {
             dto.setOptions(Arrays.asList("A", "B".repeat(100))); // 1 and 100 characters
             
             Set<ConstraintViolation<PollCreationDto>> violations = 
-                validator.validate(dto, ValidationGroups.Create.class);
+                validator.validate(dto);
             
             assertTrue(violations.isEmpty());
         }
@@ -344,7 +344,7 @@ class PollCreationDtoTest {
             dto.setOptions(Arrays.asList("Java", "Python", "JavaScript", "C#"));
             
             Set<ConstraintViolation<PollCreationDto>> violations = 
-                validator.validate(dto, ValidationGroups.Create.class);
+                validator.validate(dto);
             
             assertTrue(violations.isEmpty());
         }
@@ -356,7 +356,7 @@ class PollCreationDtoTest {
             dto.setOptions(Arrays.asList("Java", "Python", "Java", "C#"));
             
             Set<ConstraintViolation<PollCreationDto>> violations = 
-                validator.validate(dto, ValidationGroups.Create.class);
+                validator.validate(dto);
             
             assertFalse(violations.isEmpty());
             assertTrue(violations.stream()
@@ -371,7 +371,7 @@ class PollCreationDtoTest {
             dto.setOptions(Arrays.asList("Java", "java", "Python", "C#"));
             
             Set<ConstraintViolation<PollCreationDto>> violations = 
-                validator.validate(dto, ValidationGroups.Create.class);
+                validator.validate(dto);
             
             // This should pass because "Java" and "java" are different strings
             assertTrue(violations.isEmpty());
@@ -384,7 +384,7 @@ class PollCreationDtoTest {
             dto.setOptions(Arrays.asList("Java", "Python", "Java", "Python"));
             
             Set<ConstraintViolation<PollCreationDto>> violations = 
-                validator.validate(dto, ValidationGroups.Create.class);
+                validator.validate(dto);
             
             assertFalse(violations.isEmpty());
             assertTrue(violations.stream()
@@ -400,7 +400,7 @@ class PollCreationDtoTest {
             // The unique options validator should pass (let other validators handle null)
             // But we'll get a failure from the @NotNull validation
             Set<ConstraintViolation<PollCreationDto>> violations = 
-                validator.validate(dto, ValidationGroups.Create.class);
+                validator.validate(dto);
             
             // Should fail due to @NotNull, but not due to unique options validator
             assertFalse(violations.isEmpty());
@@ -422,7 +422,7 @@ class PollCreationDtoTest {
             dto.setEndsAt(LocalDateTime.now().plusDays(1));
             
             Set<ConstraintViolation<PollCreationDto>> violations = 
-                validator.validate(dto, ValidationGroups.Create.class);
+                validator.validate(dto);
             
             assertTrue(violations.isEmpty());
         }
@@ -434,7 +434,7 @@ class PollCreationDtoTest {
             dto.setEndsAt(null);
             
             Set<ConstraintViolation<PollCreationDto>> violations = 
-                validator.validate(dto, ValidationGroups.Create.class);
+                validator.validate(dto);
             
             assertTrue(violations.isEmpty());
         }
@@ -446,7 +446,7 @@ class PollCreationDtoTest {
             dto.setEndsAt(LocalDateTime.now().minusDays(1));
             
             Set<ConstraintViolation<PollCreationDto>> violations = 
-                validator.validate(dto, ValidationGroups.Create.class);
+                validator.validate(dto);
             
             assertFalse(violations.isEmpty());
             assertTrue(violations.stream()
@@ -460,7 +460,7 @@ class PollCreationDtoTest {
             dto.setEndsAt(LocalDateTime.now()); // Current time
             
             Set<ConstraintViolation<PollCreationDto>> violations = 
-                validator.validate(dto, ValidationGroups.Create.class);
+                validator.validate(dto);
             
             // This might be flaky due to timing, but should generally fail
             // since @Future requires the date to be strictly in the future
@@ -476,7 +476,7 @@ class PollCreationDtoTest {
         PollCreationDto dto = createValidDto();
         
         Set<ConstraintViolation<PollCreationDto>> violations = 
-            validator.validate(dto, ValidationGroups.Create.class);
+            validator.validate(dto);
         
         assertTrue(violations.isEmpty());
     }
@@ -492,7 +492,7 @@ class PollCreationDtoTest {
                 .build();
         
         Set<ConstraintViolation<PollCreationDto>> violations = 
-            validator.validate(dto, ValidationGroups.Create.class);
+            validator.validate(dto);
         
         assertTrue(violations.size() >= 4); // At least 4 violations
         assertTrue(violations.stream()
@@ -534,7 +534,7 @@ class PollCreationDtoTest {
         dto.setOptions(Arrays.asList("Option 1", "Option 2", "Option 3")); // Options with spaces
         
         Set<ConstraintViolation<PollCreationDto>> violations = 
-            validator.validate(dto, ValidationGroups.Create.class);
+            validator.validate(dto);
         
         assertTrue(violations.isEmpty());
     }
@@ -559,7 +559,7 @@ class PollCreationDtoTest {
                 .build();
         
         Set<ConstraintViolation<PollCreationDto>> violations = 
-            validator.validate(dto, ValidationGroups.Create.class);
+            validator.validate(dto);
         
         assertTrue(violations.isEmpty());
     }

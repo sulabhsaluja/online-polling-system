@@ -9,6 +9,8 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.context.request.WebRequest;
+import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.web.HttpMediaTypeNotSupportedException;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -107,6 +109,55 @@ public class GlobalExceptionHandler {
                 .build();
         
         return new ResponseEntity<>(errorResponse, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+
+    /**
+     * Handle HttpMessageNotReadableException (malformed JSON, empty body)
+     */
+    @ExceptionHandler(HttpMessageNotReadableException.class)
+    public ResponseEntity<ErrorResponse> handleHttpMessageNotReadableException(
+            HttpMessageNotReadableException ex, WebRequest request) {
+        
+        log.error("HttpMessageNotReadableException occurred: {}", ex.getMessage(), ex);
+        
+        String message;
+        if (ex.getMessage() != null && ex.getMessage().contains("Required request body is missing")) {
+            message = "Request body is required";
+        } else if (ex.getMessage() != null && ex.getMessage().contains("JSON parse error")) {
+            message = "Invalid JSON format";
+        } else {
+            message = "Invalid request body";
+        }
+        
+        ErrorResponse errorResponse = ErrorResponse.builder()
+                .errorCode("INVALID_REQUEST_BODY")
+                .message(message)
+                .status(HttpStatus.BAD_REQUEST.value())
+                .path(request.getDescription(false).replace("uri=", ""))
+                .timestamp(LocalDateTime.now())
+                .build();
+        
+        return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
+    }
+    
+    /**
+     * Handle HttpMediaTypeNotSupportedException (wrong content type)
+     */
+    @ExceptionHandler(HttpMediaTypeNotSupportedException.class)
+    public ResponseEntity<ErrorResponse> handleHttpMediaTypeNotSupportedException(
+            HttpMediaTypeNotSupportedException ex, WebRequest request) {
+        
+        log.error("HttpMediaTypeNotSupportedException occurred: {}", ex.getMessage(), ex);
+        
+        ErrorResponse errorResponse = ErrorResponse.builder()
+                .errorCode("UNSUPPORTED_MEDIA_TYPE")
+                .message("Unsupported media type. Expected application/json")
+                .status(HttpStatus.UNSUPPORTED_MEDIA_TYPE.value())
+                .path(request.getDescription(false).replace("uri=", ""))
+                .timestamp(LocalDateTime.now())
+                .build();
+        
+        return new ResponseEntity<>(errorResponse, HttpStatus.UNSUPPORTED_MEDIA_TYPE);
     }
 
     /**

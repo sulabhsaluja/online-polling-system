@@ -6,7 +6,7 @@ import com.polling.app.entity.PollOption;
 import com.polling.app.entity.PollResponse;
 import com.polling.app.entity.User;
 import com.polling.app.exception.ResourceNotFoundException;
-import com.polling.app.exception.ValidationException;
+// import com.polling.app.exception.ValidationException;
 import com.polling.app.mapper.UserMapper;
 import com.polling.app.service.PollService;
 import com.polling.app.service.UserService;
@@ -20,6 +20,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Map;
+import java.util.HashMap;
 
 @RestController
 @RequestMapping("/api/user")
@@ -42,10 +43,10 @@ public class UserController {
     public ResponseEntity<Map<String, Object>> loginUser(
             @Validated(ValidationGroups.Login.class) @RequestBody LoginDto loginDto) {
         User user = userService.authenticateUser(loginDto.getEmail(), loginDto.getPassword());
-        return ResponseEntity.ok(Map.of(
-                "message", "Login successful",
-                "user", user
-        ));
+        Map<String, Object> result = new HashMap<>();
+        result.put("message", "Login successful");
+        result.put("user", user);
+        return ResponseEntity.ok(result);
     }
 
     @GetMapping("/{userId}")
@@ -86,10 +87,10 @@ public class UserController {
             @PathVariable Long pollId,
             @Validated @RequestBody VoteSubmissionDto voteDto) {
         PollResponse response = pollService.submitVote(userId, pollId, voteDto.getOptionId());
-        return ResponseEntity.ok(Map.of(
-                "message", "Vote submitted successfully",
-                "response", response
-        ));
+        Map<String, Object> result = new HashMap<>();
+        result.put("message", "Vote submitted successfully");
+        result.put("response", response);
+        return ResponseEntity.ok(result);
     }
 
     @GetMapping("/{userId}/polls/{pollId}/voted")
