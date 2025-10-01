@@ -4,6 +4,7 @@ import { useAuth } from '../context/AuthContext';
 import adminService from '../services/adminService';
 import { parseValidationErrors, getFieldClass, validateField } from '../utils/validationUtils';
 import { ValidationFeedback } from './ValidationFeedback';
+import PasswordStrengthIndicator from './PasswordStrengthIndicator';
 
 const AdminRegister = () => {
   const [formData, setFormData] = useState({
@@ -96,27 +97,49 @@ const AdminRegister = () => {
   };
 
   return (
-    <div className="container-fluid vh-100 d-flex justify-content-center align-items-center bg-dark">
-      <div className="row w-100">
-        <div className="col-md-8 col-lg-6 mx-auto">
-          <div className="card shadow">
-            <div className="card-body p-5">
-              <div className="text-center mb-4">
-                <h2 className="text-success">Admin Registration</h2>
-                <p className="text-muted">Create your admin account to manage polls</p>
+    <div className="signup-container bg-gradient-dark-admin">
+      <div className="signup-bg-particles">
+        {Array.from({ length: 20 }, (_, i) => (
+          <div 
+            key={i}
+            className="particle"
+            style={{
+              left: `${Math.random() * 100}%`,
+              top: `${Math.random() * 100}%`,
+              width: `${Math.random() * 6 + 4}px`,
+              height: `${Math.random() * 6 + 4}px`,
+              animationDelay: `${Math.random() * 6}s`,
+              animationDuration: `${Math.random() * 4 + 4}s`
+            }}
+          />
+        ))}
+      </div>
+      
+      <div className="container">
+        <div className="row justify-content-center">
+          <div className="col-lg-10 col-xl-8">
+            <div className="signup-card fade-in">
+              <div className="signup-header">
+                <div className="signup-icon">
+                  <i className="bi bi-person-gear"></i>
+                </div>
+                <h1 className="signup-title">Admin Registration</h1>
+                <p className="signup-subtitle">Create your admin account to manage polls and users</p>
               </div>
 
               {error && (
-                <div className="alert alert-danger" role="alert">
-                  {error}
+                <div className="mx-4 mb-0">
+                  <div className="alert alert-modern alert-danger" role="alert">
+                    <i className="bi bi-exclamation-triangle-fill me-2"></i>
+                    {error}
+                  </div>
                 </div>
               )}
 
-              <form onSubmit={handleSubmit}>
+              <form onSubmit={handleSubmit} className="signup-form">
                 <div className="row">
                   <div className="col-md-6">
-                    <div className="mb-3">
-                      <label htmlFor="firstName" className="form-label">First Name</label>
+                    <div className="form-floating">
                       <input
                         type="text"
                         className={getFieldClass('firstName', fieldErrors, touchedFields.firstName)}
@@ -125,14 +148,17 @@ const AdminRegister = () => {
                         value={formData.firstName}
                         onChange={handleChange}
                         onBlur={handleBlur}
+                        placeholder="First Name"
                         required
                       />
+                      <label htmlFor="firstName">
+                        <i className="bi bi-person-fill me-2"></i>First Name
+                      </label>
                       <ValidationFeedback fieldName="firstName" fieldErrors={fieldErrors} />
                     </div>
                   </div>
                   <div className="col-md-6">
-                    <div className="mb-3">
-                      <label htmlFor="lastName" className="form-label">Last Name</label>
+                    <div className="form-floating">
                       <input
                         type="text"
                         className={getFieldClass('lastName', fieldErrors, touchedFields.lastName)}
@@ -141,15 +167,18 @@ const AdminRegister = () => {
                         value={formData.lastName}
                         onChange={handleChange}
                         onBlur={handleBlur}
+                        placeholder="Last Name"
                         required
                       />
+                      <label htmlFor="lastName">
+                        <i className="bi bi-person-fill me-2"></i>Last Name
+                      </label>
                       <ValidationFeedback fieldName="lastName" fieldErrors={fieldErrors} />
                     </div>
                   </div>
                 </div>
 
-                <div className="mb-3">
-                  <label htmlFor="username" className="form-label">Username</label>
+                <div className="form-floating">
                   <input
                     type="text"
                     className={getFieldClass('username', fieldErrors, touchedFields.username)}
@@ -158,13 +187,16 @@ const AdminRegister = () => {
                     value={formData.username}
                     onChange={handleChange}
                     onBlur={handleBlur}
+                    placeholder="Username"
                     required
                   />
+                  <label htmlFor="username">
+                    <i className="bi bi-at me-2"></i>Username
+                  </label>
                   <ValidationFeedback fieldName="username" fieldErrors={fieldErrors} />
                 </div>
 
-                <div className="mb-3">
-                  <label htmlFor="email" className="form-label">Email</label>
+                <div className="form-floating">
                   <input
                     type="email"
                     className={getFieldClass('email', fieldErrors, touchedFields.email)}
@@ -173,15 +205,18 @@ const AdminRegister = () => {
                     value={formData.email}
                     onChange={handleChange}
                     onBlur={handleBlur}
+                    placeholder="Email Address"
                     required
                   />
+                  <label htmlFor="email">
+                    <i className="bi bi-envelope-fill me-2"></i>Email Address
+                  </label>
                   <ValidationFeedback fieldName="email" fieldErrors={fieldErrors} />
                 </div>
 
                 <div className="row">
                   <div className="col-md-6">
-                    <div className="mb-3">
-                      <label htmlFor="password" className="form-label">Password</label>
+                    <div className="form-floating">
                       <input
                         type="password"
                         className={getFieldClass('password', fieldErrors, touchedFields.password)}
@@ -190,15 +225,19 @@ const AdminRegister = () => {
                         value={formData.password}
                         onChange={handleChange}
                         onBlur={handleBlur}
+                        placeholder="Password"
                         minLength="8"
                         required
                       />
+                      <label htmlFor="password">
+                        <i className="bi bi-lock-fill me-2"></i>Password
+                      </label>
                       <ValidationFeedback fieldName="password" fieldErrors={fieldErrors} />
                     </div>
+                    <PasswordStrengthIndicator password={formData.password} />
                   </div>
                   <div className="col-md-6">
-                    <div className="mb-3">
-                      <label htmlFor="confirmPassword" className="form-label">Confirm Password</label>
+                    <div className="form-floating">
                       <input
                         type="password"
                         className={getFieldClass('confirmPassword', fieldErrors, touchedFields.confirmPassword)}
@@ -207,9 +246,13 @@ const AdminRegister = () => {
                         value={formData.confirmPassword}
                         onChange={handleChange}
                         onBlur={handleBlur}
+                        placeholder="Confirm Password"
                         minLength="8"
                         required
                       />
+                      <label htmlFor="confirmPassword">
+                        <i className="bi bi-shield-lock-fill me-2"></i>Confirm Password
+                      </label>
                       <ValidationFeedback 
                         fieldName="confirmPassword" 
                         fieldErrors={fieldErrors} 
@@ -221,21 +264,32 @@ const AdminRegister = () => {
 
                 <button
                   type="submit"
-                  className="btn btn-success w-100 mb-3"
+                  className="signup-btn w-100"
                   disabled={loading}
                 >
-                  {loading ? 'Creating Account...' : 'Register'}
+                  {loading ? (
+                    <>
+                      <span className="loading-spinner me-2"></span>
+                      Creating Account...
+                    </>
+                  ) : (
+                    <>
+                      <i className="bi bi-person-plus-fill me-2"></i>
+                      Create Admin Account
+                    </>
+                  )}
                 </button>
-              </form>
 
-              <div className="text-center">
-                <p className="mb-0">
-                  Already have an account?{' '}
-                  <Link to="/admin/login" className="text-success">
-                    Login here
-                  </Link>
-                </p>
-              </div>
+                <div className="signup-footer">
+                  <p className="mb-0">
+                    Already have an account?{' '}
+                    <Link to="/admin/login" className="signup-link">
+                      <i className="bi bi-box-arrow-in-right me-1"></i>
+                      Sign In Here
+                    </Link>
+                  </p>
+                </div>
+              </form>
             </div>
           </div>
         </div>
