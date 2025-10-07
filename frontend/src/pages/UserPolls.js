@@ -203,14 +203,14 @@ const UserPolls = () => {
             ) : (
               filteredPolls.map((poll) => (
                 <div key={poll.id} className="col-md-6 col-lg-4 mb-4">
-                  <div className="card h-100 border-primary">
+                  <div className="card h-100 card-poll-list">
                     <div className="card-body">
                       <div className="d-flex justify-content-between align-items-start mb-3">
                         <h5 className="card-title mb-0">{poll.title}</h5>
                         <span className="badge bg-success">Active</span>
                       </div>
                       
-                      <p className="card-text text-muted">
+                      <p className="card-text">
                         {poll.description 
                           ? poll.description.substring(0, 120) + (poll.description.length > 120 ? '...' : '')
                           : 'No description provided'
@@ -229,7 +229,7 @@ const UserPolls = () => {
                       </div>
                     </div>
                     
-                    <div className="card-footer bg-transparent">
+                    <div className="card-footer">
                       <div className="d-flex justify-content-between align-items-center">
                         <VoteStatus user={user} pollId={poll.id} />
                         <Link 

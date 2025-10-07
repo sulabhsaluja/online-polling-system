@@ -261,7 +261,7 @@ const CreatePoll = () => {
             </div>
           </div>
 
-          <div className="card mt-4">
+          <div className="card mt-4 preview-card">
             <div className="card-header">
               <h6 className="mb-0">
                 <i className="bi bi-info-circle me-2"></i>

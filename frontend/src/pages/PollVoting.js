@@ -106,12 +106,12 @@ const PollVoting = () => {
     <div className="container mt-4">
       <div className="row justify-content-center">
         <div className="col-md-8">
-          <div className="card">
+          <div className="card poll-voting-card">
             <div className="card-header">
               <div className="d-flex justify-content-between align-items-center">
                 <h4 className="mb-0">{poll.title}</h4>
                 <button 
-                  className="btn btn-outline-secondary btn-sm"
+                  className="btn btn-back btn-sm"
                   onClick={() => navigate('/user/dashboard')}
                 >
                   <i className="bi bi-arrow-left me-1"></i>
@@ -121,7 +121,7 @@ const PollVoting = () => {
             </div>
             <div className="card-body">
               {poll.description && (
-                <p className="text-muted mb-4">{poll.description}</p>
+                <div className="poll-description">{poll.description}</div>
               )}
 
               {error && (
@@ -131,17 +131,24 @@ const PollVoting = () => {
               )}
 
               {!hasVoted ? (
-                <div>
+                <div className="poll-options-section">
                   <h5 className="mb-3">Cast Your Vote</h5>
                   <div className="mb-3">
                     {options.map((option) => (
-                      <div key={option.id} className="form-check mb-2">
+                      <div 
+                        key={option.id} 
+                        className={`form-check form-check-poll ${
+                          selectedOption === option.id.toString() ? 'selected' : ''
+                        }`}
+                        onClick={() => setSelectedOption(option.id.toString())}
+                      >
                         <input
                           className="form-check-input"
                           type="radio"
                           name="pollOption"
                           id={`option-${option.id}`}
                           value={option.id}
+                          checked={selectedOption === option.id.toString()}
                           onChange={(e) => setSelectedOption(e.target.value)}
                         />
                         <label className="form-check-label" htmlFor={`option-${option.id}`}>
@@ -151,7 +158,7 @@ const PollVoting = () => {
                     ))}
                   </div>
                   <button
-                    className="btn btn-primary"
+                    className="btn poll-submit-btn"
                     onClick={handleVote}
                     disabled={submitting || !selectedOption}
                   >
@@ -170,50 +177,52 @@ const PollVoting = () => {
                 </div>
               ) : (
                 <div>
-                  <div className="alert alert-success d-flex align-items-center mb-4">
+                  <div className="alert alert-success-custom d-flex align-items-center mb-4">
                     <i className="bi bi-check-circle-fill me-2"></i>
                     <div>
                       Thank you for voting! Here are the current results:
                     </div>
                   </div>
 
-                  <h5 className="mb-3">Poll Results</h5>
-                  {results && results.options ? (
-                    <div>
-                      {results.options.map((option) => {
-                        const percentage = calculatePercentage(option.voteCount, results.totalVotes);
-                        return (
-                          <div key={option.id} className="mb-3">
-                            <div className="d-flex justify-content-between align-items-center mb-1">
-                              <span>{option.optionText}</span>
-                              <span className="badge bg-primary">
-                                {option.voteCount} votes ({percentage}%)
-                              </span>
-                            </div>
-                            <div className="progress" style={{ height: '20px' }}>
-                              <div
-                                className="progress-bar"
-                                role="progressbar"
-                                style={{ width: `${percentage}%` }}
-                                aria-valuenow={percentage}
-                                aria-valuemin="0"
-                                aria-valuemax="100"
-                              >
-                                {percentage}%
+                  <div className="poll-results-section">
+                    <h5 className="mb-3">Poll Results</h5>
+                    {results && results.options ? (
+                      <div>
+                        {results.options.map((option) => {
+                          const percentage = calculatePercentage(option.voteCount, results.totalVotes);
+                          return (
+                            <div key={option.id} className="poll-result-item">
+                              <div className="poll-result-label d-flex justify-content-between align-items-center mb-2">
+                                <span>{option.optionText}</span>
+                                <span className="poll-result-stats">
+                                  {option.voteCount} votes ({percentage}%)
+                                </span>
+                              </div>
+                              <div className="progress">
+                                <div
+                                  className="progress-bar"
+                                  role="progressbar"
+                                  style={{ width: `${percentage}%` }}
+                                  aria-valuenow={percentage}
+                                  aria-valuemin="0"
+                                  aria-valuemax="100"
+                                >
+                                  {percentage}%
+                                </div>
                               </div>
                             </div>
-                          </div>
-                        );
-                      })}
-                      <div className="mt-3 text-center">
-                        <small className="text-muted">
-                          Total votes: {results.totalVotes}
-                        </small>
+                          );
+                        })}
+                        <div className="mt-3 text-center">
+                          <small className="text-muted">
+                            Total votes: {results.totalVotes}
+                          </small>
+                        </div>
                       </div>
-                    </div>
-                  ) : (
-                    <p className="text-muted">Loading results...</p>
-                  )}
+                    ) : (
+                      <p className="text-muted">Loading results...</p>
+                    )}
+                  </div>
                 </div>
               )}
             </div>

@@ -33,9 +33,7 @@ public class SecurityConfig {
                 .requestMatchers("/api/admin/polls/*/results").permitAll()
                 .requestMatchers("/api/user/polls/*/options").permitAll()
                 .requestMatchers("/api/admin/polls/*/options").permitAll()
-                // Allow all API endpoints for now (we'll implement proper JWT authentication later)
                 .requestMatchers("/api/**").permitAll()
-                // All other endpoints require authentication
                 .anyRequest().authenticated()
             );
 

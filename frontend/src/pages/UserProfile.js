@@ -35,6 +35,7 @@ const UserProfile = () => {
         firstName: user.firstName || '',
         lastName: user.lastName || ''
       });
+      fetchUserStats();
       setLoading(false);
     } else {
       // Fetch user data if not current user or data not available
@@ -51,10 +52,26 @@ const UserProfile = () => {
         firstName: userData.firstName || '',
         lastName: userData.lastName || ''
       });
+      await fetchUserStats();
     } catch (err) {
       setError('Failed to load profile data');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchUserStats = async () => {
+    try {
+      // Fetch user's voted polls to calculate statistics
+      const votedPolls = await userService.getUserVotedPolls(userId);
+      
+      setUserStats({
+        totalVotes: votedPolls.length, // Each poll represents one vote cast
+        pollsParticipated: votedPolls.length // Same as total votes for now
+      });
+    } catch (err) {
+      console.error('Failed to fetch user statistics:', err);
+      // Keep default values if fetching fails
     }
   };
 
@@ -148,7 +165,7 @@ const UserProfile = () => {
     <div className="container mt-4">
       <div className="row justify-content-center">
         <div className="col-md-8 col-lg-6">
-          <div className="card">
+          <div className={`card ${isEditing ? 'editing-mode' : ''}`}>
             <div className="card-header">
               <div className="d-flex justify-content-between align-items-center">
                 <h4 className="mb-0 text-primary">
@@ -341,13 +358,6 @@ const UserProfile = () => {
             </div>
             <div className="card-body">
               <div className="d-grid gap-2">
-                <button 
-                  className="btn btn-outline-warning"
-                  onClick={() => alert('Password change functionality would be implemented here')}
-                >
-                  <i className="bi bi-key me-2"></i>
-                  Change Password
-                </button>
                 <button 
                   className="btn btn-outline-primary"
                   onClick={() => navigate('/user/polls')}
