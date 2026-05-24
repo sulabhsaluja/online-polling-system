@@ -11,10 +11,10 @@ const Navigation = () => {
   const [scrolled, setScrolled] = useState(false);
   const [activePath, setActivePath] = useState('');
 
-  // Track scroll position for navbar animation
+  // Track scroll position for navbar background transition
   useEffect(() => {
     const handleScroll = () => {
-      const isScrolled = window.scrollY > 20;
+      const isScrolled = window.scrollY > 15;
       if (isScrolled !== scrolled) {
         setScrolled(isScrolled);
       }
@@ -26,7 +26,6 @@ const Navigation = () => {
     };
   }, [scrolled]);
 
-  // Update active path when location changes
   useEffect(() => {
     setActivePath(location.pathname);
   }, [location.pathname]);
@@ -36,45 +35,48 @@ const Navigation = () => {
     navigate('/');
   };
 
+  const getAccentColor = () => {
+    return isAdmin ? '#6366f1' : '#00e5ff';
+  };
+
   return (
-    <nav className={`navbar navbar-expand-lg navbar-dark transition-all duration-300 ${
-      scrolled 
-        ? 'shadow-lg backdrop-blur glass' 
-        : ''
-    } ${
-      isAdmin 
-        ? 'bg-gradient-success animate-aurora' 
-        : 'bg-gradient-primary animate-aurora'
-    }`} style={{
-      background: scrolled 
-        ? (isAdmin 
-          ? 'rgba(17, 153, 142, 0.9)' 
-          : 'rgba(102, 126, 234, 0.9)'
-        ) : undefined,
-      backdropFilter: scrolled ? 'blur(20px)' : undefined,
-      borderBottom: scrolled ? '1px solid rgba(255, 255, 255, 0.1)' : undefined,
-      transform: scrolled ? 'translateY(0)' : 'translateY(-5px)',
-      transition: 'all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94)'
+    <nav className="navbar navbar-expand-lg navbar-dark sticky-top transition-all duration-300" style={{
+      background: scrolled ? 'rgba(6, 11, 22, 0.85)' : 'rgba(6, 11, 22, 0.6)',
+      backdropFilter: 'blur(20px)',
+      WebkitBackdropFilter: 'blur(20px)',
+      borderBottom: '1px solid rgba(255, 255, 255, 0.08)',
+      padding: scrolled ? '10px 0' : '18px 0',
+      transition: 'all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94)',
+      boxShadow: scrolled ? `0 10px 30px rgba(0, 0, 0, 0.5)` : 'none'
     }}>
       <div className="container">
-        <Link className="navbar-brand fw-bold animate-glow-pulse hover-scale" to="/">
-          <i className="bi bi-pie-chart-fill me-2 animate-spin" style={{ animation: 'spin 8s linear infinite' }}></i>
-          <span className="neon-primary">Polling App</span>
+        
+        {/* Pulsing Cyber Logo */}
+        <Link className="navbar-brand d-flex align-items-center fw-bold text-white tracking-tight" to="/" style={{ fontSize: '1.4rem' }}>
+          <span className="d-inline-block rounded-circle bg-pulse me-2" style={{
+            width: '10px',
+            height: '10px',
+            backgroundColor: getAccentColor(),
+            boxShadow: `0 0 10px ${getAccentColor()}`,
+            animation: 'pulse 1.5s infinite'
+          }}></span>
+          <span className="font-monospace fw-bold" style={{ letterSpacing: '0.5px' }}>
+            Votex <span style={{ color: getAccentColor() }}>Cloud</span>
+          </span>
         </Link>
 
         <button
-          className="navbar-toggler micro-bounce glass-button"
+          className="navbar-toggler"
           type="button"
           data-bs-toggle="collapse"
           data-bs-target="#navbarNav"
           style={{
-            background: 'rgba(255, 255, 255, 0.1)',
-            backdropFilter: 'blur(10px)',
-            border: '1px solid rgba(255, 255, 255, 0.2)',
-            borderRadius: '8px'
+            background: 'rgba(255, 255, 255, 0.05)',
+            border: '1px solid rgba(255, 255, 255, 0.1)',
+            borderRadius: '6px'
           }}
         >
-          <span className="navbar-toggler-icon animate-bounce"></span>
+          <span className="navbar-toggler-icon"></span>
         </button>
 
         <div className="collapse navbar-collapse" id="navbarNav">
@@ -83,36 +85,41 @@ const Navigation = () => {
               <>
                 <li className="nav-item">
                   <Link 
-                    className={`nav-link micro-elastic position-relative ${
-                      activePath.includes('dashboard') ? 'active animate-glow-pulse' : ''
-                    }`}
+                    className={`nav-link px-3 font-monospace small ${activePath.includes('dashboard') ? 'active' : ''}`}
                     to={isAdmin ? "/admin/dashboard" : "/user/dashboard"}
+                    style={{
+                      color: activePath.includes('dashboard') ? getAccentColor() : '#94a3b8',
+                      transition: 'color 0.2s'
+                    }}
                   >
-                    Dashboard
-                    {activePath.includes('dashboard') && (
-                      <span className="position-absolute bottom-0 start-50 translate-middle-x" style={{
-                        width: '4px',
-                        height: '4px',
-                        background: 'currentColor',
-                        borderRadius: '50%',
-                        animation: 'glowPulse 2s infinite'
-                      }}></span>
-                    )}
+                    Console
                   </Link>
                 </li>
                 
                 {isAdmin && (
                   <>
                     <li className="nav-item">
-                      <Link className="nav-link" to="/admin/polls">
-                        <i className="bi bi-list-ul me-1"></i>
-                        My Polls
+                      <Link 
+                        className={`nav-link px-3 font-monospace small ${activePath.includes('/admin/polls') ? 'active' : ''}`} 
+                        to="/admin/polls"
+                        style={{
+                          color: activePath.includes('/admin/polls') ? getAccentColor() : '#94a3b8',
+                          transition: 'color 0.2s'
+                        }}
+                      >
+                        Ledgers
                       </Link>
                     </li>
                     <li className="nav-item">
-                      <Link className="nav-link" to="/admin/create-poll">
-                        <i className="bi bi-plus-circle me-1"></i>
-                        Create Poll
+                      <Link 
+                        className={`nav-link px-3 font-monospace small ${activePath.includes('/admin/create-poll') ? 'active' : ''}`} 
+                        to="/admin/create-poll"
+                        style={{
+                          color: activePath.includes('/admin/create-poll') ? getAccentColor() : '#94a3b8',
+                          transition: 'color 0.2s'
+                        }}
+                      >
+                        Create Stream
                       </Link>
                     </li>
                   </>
@@ -120,9 +127,15 @@ const Navigation = () => {
                 
                 {isUser && (
                   <li className="nav-item">
-                    <Link className="nav-link" to="/user/polls">
-                      <i className="bi bi-list-ul me-1"></i>
-                      Available Polls
+                    <Link 
+                      className={`nav-link px-3 font-monospace small ${activePath.includes('/user/polls') ? 'active' : ''}`} 
+                      to="/user/polls"
+                      style={{
+                        color: activePath.includes('/user/polls') ? getAccentColor() : '#94a3b8',
+                        transition: 'color 0.2s'
+                      }}
+                    >
+                      Active Streams
                     </Link>
                   </li>
                 )}
@@ -134,15 +147,15 @@ const Navigation = () => {
             {isAuthenticated ? (
               <li className="nav-item dropdown">
                 <button
-                  className="nav-link dropdown-toggle btn btn-link border-0 text-decoration-none"
+                  className="nav-link dropdown-toggle btn btn-link border-0 text-decoration-none font-monospace small text-white d-flex align-items-center"
                   id="navbarDropdown"
                   type="button"
                   onClick={() => setMenuOpen((v) => !v)}
                   aria-expanded={menuOpen}
-                  style={{color: 'inherit'}}
+                  style={{ color: 'inherit' }}
                 >
-                  <i className="bi bi-person-circle me-1"></i>
-                  {isAdmin ? admin?.firstName : user?.firstName} {isAdmin ? admin?.lastName : user?.lastName}
+                  <i className="bi bi-cpu me-2" style={{ color: getAccentColor() }}></i>
+                  {isAdmin ? admin?.firstName : user?.firstName}
                 </button>
                 {menuOpen && createPortal(
                   <>
@@ -154,40 +167,41 @@ const Navigation = () => {
                         zIndex: 2147483646
                       }}
                     />
-                    <ul className="dropdown-menu show" style={{
+                    <ul className="dropdown-menu show border" style={{
                       position: 'fixed',
                       zIndex: 2147483647,
-                      top: '60px',
+                      top: '70px',
                       right: '20px',
                       left: 'auto',
                       transform: 'none',
                       margin: '0',
                       width: '220px',
-                      backgroundColor: 'white',
-                      border: '1px solid #ddd',
-                      borderRadius: '10px',
-                      boxShadow: '0 12px 24px rgba(0,0,0,0.18)'
+                      backgroundColor: '#0b1326',
+                      borderColor: 'rgba(255, 255, 255, 0.08)',
+                      borderRadius: '8px',
+                      boxShadow: '0 12px 24px rgba(0,0,0,0.5)',
+                      padding: '6px 0'
                     }}>
                       <li>
                         <Link 
-                          className="dropdown-item" 
+                          className="dropdown-item py-2 font-monospace small text-white d-flex align-items-center" 
                           to={isAdmin ? `/admin/profile/${admin?.id}` : `/user/profile/${user?.id}`}
                           onClick={() => setMenuOpen(false)}
-                          style={{ color: '#111827', padding: '10px 14px', display: 'block' }}
+                          style={{ transition: 'background-color 0.2s', padding: '10px 14px' }}
                         >
-                          <i className="bi bi-person me-2"></i>
-                          Profile
+                          <i className="bi bi-person me-2" style={{ color: getAccentColor() }}></i>
+                          Node Profile
                         </Link>
                       </li>
-                      <li><hr className="dropdown-divider" style={{ borderTop: '1px solid rgba(0,0,0,0.12)', margin: '8px 0' }} /></li>
+                      <li><hr className="dropdown-divider" style={{ borderTop: '1px solid rgba(255,255,255,0.08)', margin: '6px 0' }} /></li>
                       <li>
                         <button 
-                          className="dropdown-item text-danger"
+                          className="dropdown-item py-2 font-monospace small text-danger d-flex align-items-center"
                           onClick={() => { setMenuOpen(false); handleLogout(); }}
-                          style={{ color: '#dc2626', padding: '10px 14px', display: 'block', width: '100%', textAlign: 'left', background: 'transparent', border: 'none' }}
+                          style={{ width: '100%', textAlign: 'left', background: 'transparent', border: 'none', padding: '10px 14px' }}
                         >
                           <i className="bi bi-box-arrow-right me-2"></i>
-                          Logout
+                          Disconnect
                         </button>
                       </li>
                     </ul>
@@ -198,13 +212,16 @@ const Navigation = () => {
             ) : (
               <>
                 <li className="nav-item">
-                  <Link className="nav-link" to="/user/login">
-                    Login
+                  <Link className="nav-link px-3 font-monospace small text-white" to="/user/login" style={{ opacity: 0.85 }}>
+                    Secure Login
                   </Link>
                 </li>
                 <li className="nav-item">
-                  <Link className="nav-link" to="/user/register">
-                    Register
+                  <Link className="nav-link px-3 font-monospace small" to="/user/register" style={{
+                    color: '#00e5ff',
+                    fontWeight: '600'
+                  }}>
+                    Register Node
                   </Link>
                 </li>
               </>

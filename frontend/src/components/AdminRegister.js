@@ -97,7 +97,7 @@ const AdminRegister = () => {
   };
 
   return (
-    <div className="signup-container bg-gradient-dark-admin">
+    <div className="signup-container">
       <div className="signup-bg-particles">
         {Array.from({ length: 20 }, (_, i) => (
           <div 
@@ -109,7 +109,8 @@ const AdminRegister = () => {
               width: `${Math.random() * 6 + 4}px`,
               height: `${Math.random() * 6 + 4}px`,
               animationDelay: `${Math.random() * 6}s`,
-              animationDuration: `${Math.random() * 4 + 4}s`
+              animationDuration: `${Math.random() * 4 + 4}s`,
+              background: 'rgba(99, 102, 241, 0.08)'
             }}
           />
         ))}
@@ -118,7 +119,7 @@ const AdminRegister = () => {
       <div className="container">
         <div className="row justify-content-center">
           <div className="col-lg-10 col-xl-8">
-            <div className="signup-card fade-in">
+            <div className="signup-card fade-in" style={{ borderColor: 'rgba(99, 102, 241, 0.15)' }}>
               <div className="signup-header">
                 <div className="signup-icon">
                   <i className="bi bi-person-gear"></i>
@@ -129,7 +130,7 @@ const AdminRegister = () => {
 
               {error && (
                 <div className="mx-4 mb-0">
-                  <div className="alert alert-modern alert-danger" role="alert">
+                  <div className="alert alert-modern alert-danger font-monospace" role="alert">
                     <i className="bi bi-exclamation-triangle-fill me-2"></i>
                     {error}
                   </div>

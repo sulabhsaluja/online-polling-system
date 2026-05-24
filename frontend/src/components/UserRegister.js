@@ -97,7 +97,7 @@ const UserRegister = () => {
   };
 
   return (
-    <div className="signup-container bg-gradient-user">
+    <div className="signup-container">
       <div className="signup-bg-particles">
         {Array.from({ length: 20 }, (_, i) => (
           <div 
@@ -118,7 +118,7 @@ const UserRegister = () => {
       <div className="container">
         <div className="row justify-content-center">
           <div className="col-lg-10 col-xl-8">
-            <div className="signup-card fade-in">
+            <div className="signup-card fade-in user">
               <div className="signup-header user">
                 <div className="signup-icon user">
                   <i className="bi bi-person-plus"></i>
@@ -129,7 +129,7 @@ const UserRegister = () => {
 
               {error && (
                 <div className="mx-4 mb-0">
-                  <div className="alert alert-modern alert-danger" role="alert">
+                  <div className="alert alert-modern alert-danger font-monospace" role="alert">
                     <i className="bi bi-exclamation-triangle-fill me-2"></i>
                     {error}
                   </div>

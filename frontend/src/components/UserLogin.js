@@ -47,25 +47,47 @@ const UserLogin = () => {
   };
 
   return (
-    <div className="container-fluid vh-100 d-flex justify-content-center align-items-center bg-light">
-      <div className="row w-100">
-        <div className="col-md-6 col-lg-4 mx-auto">
-          <div className="card shadow">
-            <div className="card-body p-5">
-              <div className="text-center mb-4">
-                <h2 className="text-primary">User Login</h2>
-                <p className="text-muted">Sign in to participate in polls</p>
+    <div className="signup-container">
+      <div className="signup-bg-particles">
+        {Array.from({ length: 15 }, (_, i) => (
+          <div 
+            key={i}
+            className="particle"
+            style={{
+              left: `${Math.random() * 100}%`,
+              top: `${Math.random() * 100}%`,
+              width: `${Math.random() * 6 + 4}px`,
+              height: `${Math.random() * 6 + 4}px`,
+              animationDelay: `${Math.random() * 6}s`,
+              animationDuration: `${Math.random() * 4 + 4}s`
+            }}
+          />
+        ))}
+      </div>
+      
+      <div className="container">
+        <div className="row justify-content-center">
+          <div className="col-md-6 col-lg-5 col-xl-4">
+            <div className="signup-card fade-in">
+              <div className="signup-header user">
+                <div className="signup-icon user">
+                  <i className="bi bi-shield-lock-fill"></i>
+                </div>
+                <h1 className="signup-title user">Voter Login</h1>
+                <p className="signup-subtitle">Sign in to Votex secure stream gateway</p>
               </div>
 
               {error && (
-                <div className="alert alert-danger" role="alert">
-                  {error}
+                <div className="mx-4 mb-0">
+                  <div className="alert alert-modern alert-danger font-monospace" role="alert">
+                    <i className="bi bi-exclamation-triangle-fill me-2"></i>
+                    {error}
+                  </div>
                 </div>
               )}
 
-              <form onSubmit={handleSubmit}>
-                <div className="mb-3">
-                  <label htmlFor="email" className="form-label">Email</label>
+              <form onSubmit={handleSubmit} className="signup-form">
+                <div className="form-floating user">
                   <input
                     type="email"
                     className="form-control"
@@ -73,12 +95,15 @@ const UserLogin = () => {
                     name="email"
                     value={formData.email}
                     onChange={handleChange}
+                    placeholder="name@example.com"
                     required
                   />
+                  <label htmlFor="email">
+                    <i className="bi bi-envelope-fill me-2"></i>Email Address
+                  </label>
                 </div>
 
-                <div className="mb-3">
-                  <label htmlFor="password" className="form-label">Password</label>
+                <div className="form-floating user">
                   <input
                     type="password"
                     className="form-control"
@@ -86,32 +111,46 @@ const UserLogin = () => {
                     name="password"
                     value={formData.password}
                     onChange={handleChange}
+                    placeholder="••••••••"
                     required
                   />
+                  <label htmlFor="password">
+                    <i className="bi bi-lock-fill me-2"></i>Password
+                  </label>
                 </div>
 
                 <button
                   type="submit"
-                  className="btn btn-primary w-100 mb-3"
+                  className="signup-btn user w-100"
                   disabled={loading}
                 >
-                  {loading ? 'Signing in...' : 'Sign In'}
+                  {loading ? (
+                    <>
+                      <span className="loading-spinner me-2"></span>
+                      Authenticating Node...
+                    </>
+                  ) : (
+                    <>
+                      <i className="bi bi-box-arrow-in-right me-2"></i>
+                      Sign In
+                    </>
+                  )}
                 </button>
-              </form>
 
-              <div className="text-center">
-                <p className="mb-2">
-                  Don't have an account?{' '}
-                  <Link to="/user/register" className="text-primary">
-                    Register here
-                  </Link>
-                </p>
-                <p className="mb-0">
-                  <Link to="/admin/login" className="text-secondary">
-                    Admin Login
-                  </Link>
-                </p>
-              </div>
+                <div className="signup-footer">
+                  <p className="mb-2" style={{ color: '#94a3b8' }}>
+                    Don't have a registered node?{' '}
+                    <Link to="/user/register" className="signup-link user">
+                      Register here
+                    </Link>
+                  </p>
+                  <p className="mb-0">
+                    <Link to="/admin/login" className="signup-link" style={{ color: '#818cf8' }}>
+                      Admin Console Gateway
+                    </Link>
+                  </p>
+                </div>
+              </form>
             </div>
           </div>
         </div>
