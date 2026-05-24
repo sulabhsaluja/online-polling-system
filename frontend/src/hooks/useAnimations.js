@@ -93,6 +93,7 @@ export const useStaggeredAnimation = (items = [], delay = 100, animationClass = 
         setAnimatedItems(prev => new Set([...prev, index]));
       }, index * delay);
     });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isVisible, items.length, delay]);
 
   const getItemProps = (index) => {

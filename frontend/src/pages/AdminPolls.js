@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import adminService from '../services/adminService';
@@ -12,17 +12,7 @@ const AdminPolls = () => {
   const [filter, setFilter] = useState('all'); // all, active, inactive
   const [searchTerm, setSearchTerm] = useState('');
 
-  useEffect(() => {
-    if (admin) {
-      fetchAdminPolls();
-    }
-  }, [admin]);
-
-  useEffect(() => {
-    filterPolls();
-  }, [polls, filter, searchTerm]);
-
-  const fetchAdminPolls = async () => {
+  const fetchAdminPolls = useCallback(async () => {
     try {
       const adminPolls = await adminService.getAdminPolls(admin.id);
       setPolls(adminPolls);
@@ -31,9 +21,15 @@ const AdminPolls = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [admin]);
 
-  const filterPolls = () => {
+  useEffect(() => {
+    if (admin) {
+      fetchAdminPolls();
+    }
+  }, [admin, fetchAdminPolls]);
+
+  const filterPolls = useCallback(() => {
     let filtered = polls;
 
     // Filter by status
@@ -52,7 +48,11 @@ const AdminPolls = () => {
     }
 
     setFilteredPolls(filtered);
-  };
+  }, [polls, filter, searchTerm]);
+
+  useEffect(() => {
+    filterPolls();
+  }, [filterPolls]);
 
   const handleActivatePoll = async (pollId) => {
     try {

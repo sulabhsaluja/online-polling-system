@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import adminService from '../services/adminService';
@@ -19,22 +19,7 @@ const AdminProfile = () => {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
 
-  useEffect(() => {
-    if (admin && admin.id.toString() === adminId) {
-      setProfileData({
-        username: admin.username || '',
-        email: admin.email || '',
-        firstName: admin.firstName || '',
-        lastName: admin.lastName || ''
-      });
-      setLoading(false);
-    } else {
-      // Fetch admin data if not current admin or data not available
-      fetchAdminData();
-    }
-  }, [admin, adminId]);
-
-  const fetchAdminData = async () => {
+  const fetchAdminData = useCallback(async () => {
     try {
       const adminData = await adminService.getAdminById(adminId);
       setProfileData({
@@ -48,7 +33,22 @@ const AdminProfile = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [adminId]);
+
+  useEffect(() => {
+    if (admin && admin.id.toString() === adminId) {
+      setProfileData({
+        username: admin.username || '',
+        email: admin.email || '',
+        firstName: admin.firstName || '',
+        lastName: admin.lastName || ''
+      });
+      setLoading(false);
+    } else {
+      // Fetch admin data if not current admin or data not available
+      fetchAdminData();
+    }
+  }, [admin, adminId, fetchAdminData]);
 
   const handleInputChange = (e) => {
     setProfileData({

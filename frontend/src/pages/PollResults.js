@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import adminService from '../services/adminService';
@@ -12,13 +12,7 @@ const PollResults = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
-  useEffect(() => {
-    if (admin && pollId) {
-      fetchPollResults();
-    }
-  }, [admin, pollId]);
-
-  const fetchPollResults = async () => {
+  const fetchPollResults = useCallback(async () => {
     try {
       const pollResults = await adminService.getPollResults(pollId);
       
@@ -52,7 +46,13 @@ const PollResults = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [admin.id, pollId]);
+
+  useEffect(() => {
+    if (admin && pollId) {
+      fetchPollResults();
+    }
+  }, [admin, pollId, fetchPollResults]);
 
   const calculatePercentage = (voteCount, totalVotes) => {
     if (totalVotes === 0) return 0;

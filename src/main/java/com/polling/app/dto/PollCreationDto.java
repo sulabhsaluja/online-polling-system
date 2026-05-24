@@ -13,9 +13,7 @@ import lombok.NoArgsConstructor;
 import java.time.LocalDateTime;
 import java.util.List;
 
-/**
- * DTO for poll creation requests
- */
+
 @Data
 @Builder
 @NoArgsConstructor

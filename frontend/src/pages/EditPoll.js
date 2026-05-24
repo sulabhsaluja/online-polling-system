@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import adminService from '../services/adminService';
@@ -21,13 +21,7 @@ const EditPoll = () => {
   const [fieldErrors, setFieldErrors] = useState({});
   const [touchedFields, setTouchedFields] = useState({});
 
-  useEffect(() => {
-    if (admin && pollId) {
-      fetchPoll();
-    }
-  }, [admin, pollId]);
-
-  const fetchPoll = async () => {
+  const fetchPoll = useCallback(async () => {
     try {
       // Get poll details by finding it in admin polls
       const adminPolls = await adminService.getAdminPolls(admin.id);
@@ -47,7 +41,13 @@ const EditPoll = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [admin, pollId]);
+
+  useEffect(() => {
+    if (admin && pollId) {
+      fetchPoll();
+    }
+  }, [admin, pollId, fetchPoll]);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;

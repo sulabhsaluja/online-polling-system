@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import userService from '../services/userService';
@@ -12,21 +12,13 @@ const UserDashboard = () => {
   const [error, setError] = useState('');
 
   // Animation hooks - simplified since we're applying animations directly
-  const headerRef = useRef();
-  const activeCardRef = useRef();
   const votedCardRef = useRef();
   const sidebarRef = useRef();
   const pollsRef = useRef();
   const votedPollsRef = useRef();
   const showLoading = useLoadingAnimation(loading, 300);
 
-  useEffect(() => {
-    if (user) {
-      fetchDashboardData();
-    }
-  }, [user]);
-
-  const fetchDashboardData = async () => {
+  const fetchDashboardData = useCallback(async () => {
     try {
       console.log('Starting to fetch dashboard data for user:', user);
       
@@ -55,7 +47,13 @@ const UserDashboard = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [user]);
+
+  useEffect(() => {
+    if (user) {
+      fetchDashboardData();
+    }
+  }, [user, fetchDashboardData]);
 
   const formatDate = (dateString) => {
     return new Date(dateString).toLocaleDateString('en-US', {

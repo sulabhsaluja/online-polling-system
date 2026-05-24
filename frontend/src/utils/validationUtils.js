@@ -170,6 +170,8 @@ export const validateField = (fieldName, value) => {
       case 'username':
         errors.push('Username contains invalid characters');
         break;
+      default:
+        break;
     }
   }
 

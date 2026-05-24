@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import userService from '../services/userService';
@@ -27,23 +27,22 @@ const UserProfile = () => {
     pollsParticipated: 0
   });
 
-  useEffect(() => {
-    if (user && user.id.toString() === userId) {
-      setProfileData({
-        username: user.username || '',
-        email: user.email || '',
-        firstName: user.firstName || '',
-        lastName: user.lastName || ''
+  const fetchUserStats = useCallback(async () => {
+    try {
+      // Fetch user's voted polls to calculate statistics
+      const votedPolls = await userService.getUserVotedPolls(userId);
+      
+      setUserStats({
+        totalVotes: votedPolls.length, // Each poll represents one vote cast
+        pollsParticipated: votedPolls.length // Same as total votes for now
       });
-      fetchUserStats();
-      setLoading(false);
-    } else {
-      // Fetch user data if not current user or data not available
-      fetchUserData();
+    } catch (err) {
+      console.error('Failed to fetch user statistics:', err);
+      // Keep default values if fetching fails
     }
-  }, [user, userId]);
+  }, [userId]);
 
-  const fetchUserData = async () => {
+  const fetchUserData = useCallback(async () => {
     try {
       const userData = await userService.getUserById(userId);
       setProfileData({
@@ -58,22 +57,23 @@ const UserProfile = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [userId, fetchUserStats]);
 
-  const fetchUserStats = async () => {
-    try {
-      // Fetch user's voted polls to calculate statistics
-      const votedPolls = await userService.getUserVotedPolls(userId);
-      
-      setUserStats({
-        totalVotes: votedPolls.length, // Each poll represents one vote cast
-        pollsParticipated: votedPolls.length // Same as total votes for now
+  useEffect(() => {
+    if (user && user.id.toString() === userId) {
+      setProfileData({
+        username: user.username || '',
+        email: user.email || '',
+        firstName: user.firstName || '',
+        lastName: user.lastName || ''
       });
-    } catch (err) {
-      console.error('Failed to fetch user statistics:', err);
-      // Keep default values if fetching fails
+      fetchUserStats();
+      setLoading(false);
+    } else {
+      // Fetch user data if not current user or data not available
+      fetchUserData();
     }
-  };
+  }, [user, userId, fetchUserData, fetchUserStats]);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;

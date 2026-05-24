@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import userService from '../services/userService';
@@ -12,14 +12,6 @@ const UserPolls = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [sortBy, setSortBy] = useState('newest'); // newest, oldest, title
 
-  useEffect(() => {
-    fetchPolls();
-  }, []);
-
-  useEffect(() => {
-    filterAndSortPolls();
-  }, [polls, searchTerm, sortBy]);
-
   const fetchPolls = async () => {
     try {
       const activePolls = await userService.getActivePolls();
@@ -31,7 +23,11 @@ const UserPolls = () => {
     }
   };
 
-  const filterAndSortPolls = () => {
+  useEffect(() => {
+    fetchPolls();
+  }, []);
+
+  const filterAndSortPolls = useCallback(() => {
     let filtered = polls;
 
     // Filter by search term
@@ -56,16 +52,11 @@ const UserPolls = () => {
     });
 
     setFilteredPolls(filtered);
-  };
+  }, [polls, searchTerm, sortBy]);
 
-  const checkIfVoted = async (pollId) => {
-    try {
-      const result = await userService.hasUserVoted(user.id, pollId);
-      return result.hasVoted;
-    } catch {
-      return false;
-    }
-  };
+  useEffect(() => {
+    filterAndSortPolls();
+  }, [filterAndSortPolls]);
 
   const formatDate = (dateString) => {
     return new Date(dateString).toLocaleDateString('en-US', {
