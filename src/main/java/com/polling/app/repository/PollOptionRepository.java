@@ -2,6 +2,9 @@ package com.polling.app.repository;
 
 import com.polling.app.entity.PollOption;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -34,4 +37,16 @@ public interface PollOptionRepository extends JpaRepository<PollOption, Long> {
      * @return the matching poll option, or null if not found
      */
     PollOption findByIdAndPollId(Long optionId, Long pollId);
+
+    /**
+     * Atomically increments the vote count for a poll option at the database level.
+     * Avoids the read-modify-write race condition that a Java-side
+     * getVoteCount() + 1 / save() pattern is vulnerable to under concurrent votes.
+     *
+     * @param id the ID of the poll option
+     * @return number of rows updated (should be 1)
+     */
+    @Modifying
+    @Query("UPDATE PollOption o SET o.voteCount = o.voteCount + 1 WHERE o.id = :id")
+    int incrementVoteCount(@Param("id") Long id);
 }
