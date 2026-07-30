@@ -6,6 +6,7 @@ import com.polling.app.exception.ResourceNotFoundException;
 import com.polling.app.repository.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -27,21 +28,20 @@ public class PollService {
 
     public Poll createPoll(Long adminId, Poll poll, List<String> optionTexts) {
         log.info("Creating new poll: {} by admin ID: {}", poll.getTitle(), adminId);
-        
+
         Admin admin = adminRepository.findById(adminId)
                 .orElseThrow(() -> new ResourceNotFoundException("Admin", adminId));
-        
+
         poll.setAdmin(admin);
         Poll savedPoll = pollRepository.save(poll);
-        
-        // Create poll options
+
         for (String optionText : optionTexts) {
             PollOption option = new PollOption();
             option.setOptionText(optionText);
             option.setPoll(savedPoll);
             pollOptionRepository.save(option);
         }
-        
+
         return savedPoll;
     }
 
@@ -69,11 +69,11 @@ public class PollService {
         log.info("Updating poll with ID: {}", pollId);
         Poll existingPoll = pollRepository.findById(pollId)
                 .orElseThrow(() -> new ResourceNotFoundException("Poll", pollId));
-        
+
         existingPoll.setTitle(updatedPoll.getTitle());
         existingPoll.setDescription(updatedPoll.getDescription());
         existingPoll.setEndsAt(updatedPoll.getEndsAt());
-        
+
         return pollRepository.save(existingPoll);
     }
 
@@ -81,7 +81,7 @@ public class PollService {
         log.info("Deactivating poll with ID: {}", pollId);
         Poll poll = pollRepository.findById(pollId)
                 .orElseThrow(() -> new ResourceNotFoundException("Poll", pollId));
-        
+
         poll.setIsActive(false);
         pollRepository.save(poll);
     }
@@ -90,7 +90,7 @@ public class PollService {
         log.info("Activating poll with ID: {}", pollId);
         Poll poll = pollRepository.findById(pollId)
                 .orElseThrow(() -> new ResourceNotFoundException("Poll", pollId));
-        
+
         poll.setIsActive(true);
         pollRepository.save(poll);
     }
@@ -100,26 +100,23 @@ public class PollService {
         if (!pollRepository.existsById(pollId)) {
             throw new ResourceNotFoundException("Poll", pollId);
         }
-        
+
         try {
-            // First delete all poll responses for this poll
             List<PollResponse> responses = pollResponseRepository.findByPollId(pollId);
             if (!responses.isEmpty()) {
                 log.info("Deleting {} poll responses for poll ID: {}", responses.size(), pollId);
                 pollResponseRepository.deleteAll(responses);
             }
-            
-            // Then delete all poll options for this poll
+
             List<PollOption> options = pollOptionRepository.findByPollIdOrderByVoteCountDesc(pollId);
             if (!options.isEmpty()) {
                 log.info("Deleting {} poll options for poll ID: {}", options.size(), pollId);
                 pollOptionRepository.deleteAll(options);
             }
-            
-            // Finally delete the poll itself
+
             pollRepository.deleteById(pollId);
             log.info("Successfully deleted poll with ID: {}", pollId);
-            
+
         } catch (Exception e) {
             log.error("Error deleting poll with ID {}: {}", pollId, e.getMessage(), e);
             throw new InvalidOperationException("Failed to delete poll: " + e.getMessage(), e);
@@ -128,43 +125,43 @@ public class PollService {
 
     public PollResponse submitVote(Long userId, Long pollId, Long optionId) {
         log.info("User {} voting on poll {} with option {}", userId, pollId, optionId);
-        
-        // Validate user exists
+
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("User", userId));
-        
-        // Validate poll exists and is active
+
         Poll poll = pollRepository.findById(pollId)
                 .orElseThrow(() -> new ResourceNotFoundException("Poll", pollId));
-        
+
         if (!poll.getIsActive() || (poll.getEndsAt() != null && poll.getEndsAt().isBefore(LocalDateTime.now()))) {
             throw new InvalidOperationException("Poll is not active or has expired");
         }
-        
-        // Check if user has already voted
+
+        // Fast, friendly check for the normal case — the DB unique constraint is the real safety net
         if (pollResponseRepository.existsByUserIdAndPollId(userId, pollId)) {
             throw new InvalidOperationException("User has already voted on this poll");
         }
-        
-        // Validate option exists for this poll
+
         PollOption option = pollOptionRepository.findById(optionId)
                 .orElseThrow(() -> new ResourceNotFoundException("Poll option", optionId));
-        
+
         if (!option.getPoll().getId().equals(pollId)) {
             throw new InvalidOperationException("Option does not belong to this poll");
         }
-        
-        // Create poll response
+
         PollResponse response = new PollResponse();
         response.setUser(user);
         response.setPoll(poll);
         response.setPollOption(option);
-        
-        // Update vote count
-        option.setVoteCount(option.getVoteCount() + 1);
-        pollOptionRepository.save(option);
-        
-        return pollResponseRepository.save(response);
+
+        try {
+            PollResponse savedResponse = pollResponseRepository.save(response);
+
+            pollOptionRepository.incrementVoteCount(optionId);
+
+            return savedResponse;
+        } catch (DataIntegrityViolationException e) {
+            throw new InvalidOperationException("User has already voted on this poll");
+        }
     }
 
     @Transactional(readOnly = true)
